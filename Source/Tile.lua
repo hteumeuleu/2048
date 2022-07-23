@@ -51,9 +51,11 @@ function Tile:slideTo(x, y)
 	local actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
 	if length > 0 then
 		for _, collision in ipairs(collisions) do
-			local otherTile = collision.other
-			if otherTile:getTag() == self:getTag() and otherTile.x == self.x and otherTile.y == self.y then
-				return actualX, actualY, true, otherTile
+			local overlap = (collision.type == playdate.graphics.sprite.kCollisionTypeOverlap)
+			local sprite = collision.sprite
+			local other = collision.other
+			if overlap and other.x == sprite.x and other.y == sprite.y then
+				return actualX, actualY, true, other
 			end
 		end
 	end

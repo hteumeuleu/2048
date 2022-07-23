@@ -13,7 +13,6 @@ function Grid:init()
 	self:draw()
 	self:initTiles()
 	self:initInputHandlers()
-	self:print()
 	return self
 
 end
@@ -64,20 +63,20 @@ function Grid:initTiles()
 		kEmptyTile, kEmptyTile, kEmptyTile, kEmptyTile,
 		kEmptyTile, kEmptyTile, kEmptyTile, kEmptyTile
 	}
-	self:addTile(2, 3, 16)
-	self:addTile(3, 1, 4)
 	self:addTile(1, 1, 2)
+	self:addTile(2, 3, 16)
 	self:addTile(1, 4, 2)
+	self:addTile(3, 1, 4)
 end
 
 -- moveTile()
 --
-function Grid:moveTileInArray(fromCol, fromRow, toCol, toRow)
+function Grid:moveTileInArray(fromIndex, toIndex)
 
-	local fromIndex = self:getIndex(fromCol, fromRow)
-	local toIndex = self:getIndex(toCol, toRow)
-	self.tiles[toIndex] = self.tiles[fromIndex]
-	self.tiles[fromIndex] = kEmptyTile
+	if fromIndex ~= toIndex and fromIndex >= 1 and toIndex <= #self.tiles then
+		self.tiles[toIndex] = self.tiles[fromIndex]
+		self.tiles[fromIndex] = kEmptyTile
+	end
 
 end
 
@@ -120,79 +119,62 @@ function Grid:getY(row)
 
 end
 
+function Grid:findFarthestPosition(i, vector)
+
+	local col, row = self:getCoords(i)
+	if vector.x == -1 then
+		col = 1
+	end
+	if vector.x == 1 then
+		col = 4
+	end
+	if vector.y == -1 then
+		row = 1
+	end
+	if vector.y == 1 then
+		row = 4
+	end
+	return col, row
+
+end
+
 -- move(colTarget, rowTarget)
 --
 -- Apply moves inside the Grid in the direction of `colTarget` and `rowTarget`.
 -- `colTarget` and `rowTarget` can be either 1 (left or up), 4 (right or down) or 0 (no movement).
-function Grid:move(colTarget, rowTarget)
+function Grid:move(direction)
 
-	local dirX = 1
-	local dirY = 1
-	local colStart = 1
-	local rowStart = 1
-	if colTarget ~= 0 then
-		colStart = colTarget
-	end
-	if rowTarget ~= 0 then
-		rowStart = rowTarget
-	end
-	local colStop = 4
-	local rowStop = 4
-	if colStart == 4 then
-		colStop = 1
-		dirX = -1
-	end
-	if rowStart == 4 then
-		rowStop = 1
-		dirY = -1
-	end
+	local vector <const> = self:getVector(direction)
+	local traversals = self:buildTraversals(vector)
 
-	for col=colStart, colStop, dirX do
-		for row=rowStart, rowStop, dirY do
-			local tile = self.tiles[self:getIndex(col, row)]
-
+	for _, col in ipairs(traversals.x) do
+		for _, row in ipairs(traversals.y) do
+			local i = self:getIndex(col, row)
+			local tile = self.tiles[i]
 			if tile ~= nil and tile ~= kEmptyTile then
-
-				local currentCol, currentRow = self:getCoordsFromTile(tile)
-				local newCol = colTarget
-				if newCol == 0 then
-					newCol = currentCol
-				end
-				local newRow = rowTarget
-				if newRow == 0 then
-					newRow = currentRow
-				end
-				if currentCol ~= newCol or currentRow ~= newRow then
-					local currentX = tile.x
-					local currentY = tile.y
-					local targetX, targetY = self:getDrawingPositionAt(newCol, newRow)
+				local farthestCol, farthestRow = self:findFarthestPosition(i, vector)
+				local targetX, targetY = self:getDrawingPositionAt(farthestCol, farthestRow)
+				if targetX ~= tile.x or targetY ~= tile.y then
 					local actualX, actualY, merged, otherTile = tile:slideTo(targetX, targetY)
-					if merged then
+					-- Merged
+					if merged and otherTile then
+						local newCol, newRow = self:getCoordsFromPosition(actualX, actualY)
+						local newValue = otherTile.value * 2
 						for j, t in ipairs(self.tiles) do
-							if t == tile or t == otherTile then
+							if t == otherTile or t == tile then
 								self.tiles[j]:remove() -- Remote sprite from display
 								self.tiles[j] = kEmptyTile -- Remote Tile from array
 							end
 						end
-						local newValue = otherTile.value * 2
 						local newTile = self:addTile(newCol, newRow, newValue)
-					elseif actualX ~= currentX or actualY ~= currentY then
-						if actualX ~= targetX then
-							newCol = newCol + dirX * math.floor((targetX - actualX) / gMove)
-						end
-						if actualY ~= targetY then
-							newRow = newRow + dirY * math.floor((targetY - actualY) / gMove)
-						end
-						self:moveTileInArray(currentCol, currentRow, newCol, newRow)
+					else
+						local newCol, newRow = self:getCoordsFromPosition(actualX, actualY)
+						self:moveTileInArray(i, self:getIndex(newCol, newRow))
 					end
 				end
-
 			end
-
 		end
 	end
-
-	self:print()
 
 end
 
@@ -200,25 +182,9 @@ end
 --
 function Grid:getCoordsFromPosition(x, y)
 
-	local col = (x - self.x) / gMove
-	local row = (y - self.y) / gMove
+	local col = math.ceil((x - self.x) / gMove)
+	local row = math.ceil((y - self.y) / gMove)
 	return col, row
-
-end
-
--- getCoordsFromTile(tile)
---
-function Grid:getCoordsFromTile(tile)
-
-	for i, t in ipairs(self.tiles) do
-
-		if tile == t then
-			return self:getCoords(i)
-		end
-
-	end
-
-	return nil
 
 end
 
@@ -234,7 +200,7 @@ end
 --
 function Grid:getCoords(index)
 
-	return math.ceil(index % 4), math.ceil(index / 4)
+	return math.ceil((index - 1) % 4 + 1), math.ceil(index / 4)
 
 end
 
@@ -260,12 +226,55 @@ function Grid:createBackgroundImage()
 
 end
 
+
+function Grid:getVector(direction)
+
+	local map <const> = {
+		playdate.geometry.vector2D.new(0, -1), -- Up
+		playdate.geometry.vector2D.new(1, 0), -- Right
+		playdate.geometry.vector2D.new(0, 1), -- Down
+		playdate.geometry.vector2D.new(-1, 0), -- Left
+	}
+
+	return map[direction]
+
+end
+
+function Grid:buildTraversals(vector)
+
+	local traversals = {}
+	traversals.x = {}
+	traversals.y = {}
+
+	for pos=1, 4, 1 do
+		table.insert(traversals.x, pos)
+		table.insert(traversals.y, pos)
+	end
+
+	local function reverse(item1, item2)
+		return item1 > item2
+	end
+
+	if (vector.x == 1) then
+		table.sort(traversals.x, reverse)
+	end
+	if (vector.y == 1) then
+		table.sort(traversals.y, reverse)
+	end
+
+	return traversals
+
+end
+
 -- initInputHandlers()
 --
 -- Add control handlers.
 function Grid:initInputHandlers()
 
 	local gridInputHandlers = {
+		AButtonDown = function()
+			self:print()
+		end,
 		leftButtonDown = function()
 			self:moveLeft()
 		end,
@@ -304,24 +313,24 @@ end
 -- Shorthand functions for game movements
 function Grid:moveLeft()
 
-	self:move(1, 0)
+	self:move(4)
 
 end
 
 function Grid:moveRight()
 
-	self:move(4, 0)
+	self:move(2)
 
 end
 
 function Grid:moveUp()
 
-	self:move(0, 1)
+	self:move(1)
 
 end
 
 function Grid:moveDown()
 
-	self:move(0, 4)
+	self:move(3)
 
 end
