@@ -1,15 +1,18 @@
 class('Tile').extends(playdate.graphics.sprite)
 
-function Tile:init(col, row, value)
+local kTileCollisionGroup = 1
+
+function Tile:init(value)
 
 	Tile.super.init(self)
 	self.value = value
 	self.width = gTileSize
 	self.height = gTileSize
 	self:initImage()
-	self:setCoords(col, row)
 	self:setCollideRect(gGridBorderSize / 2 * -1, gGridBorderSize / 2 * -1, self.width + gGridBorderSize, self.height + gGridBorderSize)
 	self:setTag(value)
+	self:setGroups({kTileCollisionGroup})
+	self:setCollidesWithGroups({kTileCollisionGroup})
 	self:add()
 	return self
 
@@ -37,51 +40,24 @@ function Tile:initImage()
 
 end
 
--- getCoords()
---
--- Get the coordinates in terms of rows and columns inside the Grid.
-function Tile:getCoords()
-
-	return self.col, self.row
-
-end
-
-
--- setCoords(col, row)
---
--- Set the coordinates in terms of rows and columns inside the Grid.
--- x and y are Integer values ranging from 1 to 4.
-function Tile:setCoords(col, row)
-
-	self.col = col
-	self.row = row
-	self:setZIndex(math.max(col, row))
-
-end
-
--- slideTo(coordsX, coordsY, x, y)
+-- slideTo(x, y)
 --
 -- x and y: the actual x and y position to draw at (in pixels)
 --
--- Returns true if the Tile was moved at the expected position.
--- Returns false otherwise. If the Tile overlapped another Tile with the same value,
--- also returns the value of the new tile to create in place, as well as the other tile merged with.
+-- Returns the actualX and actualY the tile ends up at,
+-- and a boolean indicating whether the Tile has merged with another or not.
 function Tile:slideTo(x, y)
 
 	local actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
 	if length > 0 then
-		-- coordsX = coordsX + ((actualX - x) / gMove)
-		-- coordsY = coordsY + ((actualY - y) / gMove)
 		for _, collision in ipairs(collisions) do
-			if collision.other:getTag() == self:getTag() then
-				return false, self.value * 2, collision.other
+			local otherTile = collision.other
+			if otherTile:getTag() == self:getTag() and otherTile.x == self.x and otherTile.y == self.y then
+				return actualX, actualY, true, otherTile
 			end
 		end
-		-- self:setCoords(coordsX, coordsY)
-		return false
 	end
-	-- self:setCoords(coordsX, coordsY)
-	return true
+	return actualX, actualY, false
 
 end
 
