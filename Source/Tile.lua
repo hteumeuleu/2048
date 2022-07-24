@@ -54,7 +54,7 @@ function Tile:slideTo(x, y)
 			local overlap = (collision.type == playdate.graphics.sprite.kCollisionTypeOverlap)
 			local sprite = collision.sprite
 			local other = collision.other
-			if overlap and other.x == sprite.x and other.y == sprite.y then
+			if overlap then
 				return actualX, actualY, true, other
 			end
 		end

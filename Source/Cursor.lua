@@ -12,6 +12,7 @@ function Cursor:init()
 	self.height = kCursorSize
 	self:setZIndex(0)
 	self:initImage()
+	self:setCollisionsEnabled(false)
 	return self
 
 end
