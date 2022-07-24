@@ -7,6 +7,7 @@ import "CoreLibs/crank"
 import "CoreLibs/animator"
 import "Grid"
 import "Tile"
+import "Cursor"
 
 gGridSize = 240
 gGridRadius = 4

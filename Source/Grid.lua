@@ -13,6 +13,7 @@ function Grid:init()
 	self:draw()
 	self:initTiles()
 	self:initInputHandlers()
+	self.cursor = Cursor()
 	return self
 
 end
@@ -64,7 +65,7 @@ function Grid:initTiles()
 		kEmptyTile, kEmptyTile, kEmptyTile, kEmptyTile
 	}
 	self:addTile(1, 1, 2)
-	self:addTile(2, 3, 16)
+	self:addTile(3, 3, 16)
 	self:addTile(1, 4, 2)
 	self:addTile(3, 1, 4)
 end
@@ -289,6 +290,8 @@ function Grid:initInputHandlers()
 		end,
 		cranked = function()
 			local abs = playdate.getCrankPosition()
+			self.cursor:setAngle(abs)
+			self.cursor:add()
 			local function moveAfterCrank(abs)
 				if abs >= 45 and abs < 135 then
 					self:moveRight()
