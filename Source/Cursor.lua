@@ -24,7 +24,6 @@ function Cursor:setAngle(angle)
 	self.angle = math.rad(angle - 90)
 	local x = 200 + math.cos(self.angle) * kImaginaryCircleRadius
 	local y = 120 + math.sin(self.angle) * kImaginaryCircleRadius
-	print(self.angle, playdate.geometry.point.new(x, y))
 	self:moveTo(x, y)
 
 end
