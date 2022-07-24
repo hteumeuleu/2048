@@ -77,6 +77,17 @@ function Grid:moveTileInArray(fromIndex, toIndex)
 	if fromIndex ~= toIndex and fromIndex >= 1 and toIndex <= #self.tiles then
 		self.tiles[toIndex] = self.tiles[fromIndex]
 		self.tiles[fromIndex] = kEmptyTile
+		self:setZIndex(toIndex)
+	end
+
+end
+
+-- setZIndex()
+function Grid:setZIndex(i)
+
+	if self.tiles[i] ~= nil and self.tiles[i] ~= kEmptyTile then
+		local col, row = self:getCoords(i)
+		self.tiles[i]:setZIndex(math.max(col, row))
 	end
 
 end
@@ -90,6 +101,7 @@ function Grid:addTile(col, row, value)
 	t:moveTo(self:getDrawingPositionAt(col, row))
 	local i = self:getIndex(col, row)
 	self.tiles[i] = t
+	self:setZIndex(i)
 
 end
 

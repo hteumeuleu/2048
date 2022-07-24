@@ -1,8 +1,8 @@
 class('Cursor').extends(playdate.graphics.sprite)
 
-local kCursorSize <const> = 16
+local kCursorSize <const> = 32
 local kCursorRadius <const> = kCursorSize / 2
-local kCursorBorderSize <const> = 3
+local kCursorBorderSize <const> = 4
 local kImaginaryCircleRadius <const> = 120 - kCursorRadius
 
 function Cursor:init()
@@ -10,7 +10,7 @@ function Cursor:init()
 	Cursor.super.init(self)
 	self.width = kCursorSize
 	self.height = kCursorSize
-	self:setZIndex(10)
+	self:setZIndex(0)
 	self:initImage()
 	return self
 
@@ -35,12 +35,14 @@ function Cursor:initImage()
 
 	local img = playdate.graphics.image.new(self.width, self.height)
 	playdate.graphics.pushContext(img)
-		-- Background
-		playdate.graphics.setColor(playdate.graphics.kColorBlack)
+		-- Outline
+		playdate.graphics.setPattern({0x77, 0xFF, 0xDD, 0xFF, 0x77, 0xFF, 0xDD, 0xFF})
 		playdate.graphics.fillCircleInRect(0, 0, self.width, self.height, kCursorRadius)
 		-- Foreground
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
-		playdate.graphics.fillCircleInRect(kCursorBorderSize, kCursorBorderSize, self.width - (2 * kCursorBorderSize), self.height - (2 * kCursorBorderSize), kCursorRadius)
+		playdate.graphics.setStrokeLocation(playdate.graphics.kStrokeInside)
+		playdate.graphics.setLineWidth(kCursorBorderSize)
+		playdate.graphics.drawCircleInRect(0, 0, self.width, self.height, kCursorRadius)
 	playdate.graphics.popContext()
 	self:setImage(img)
 
