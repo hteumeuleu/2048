@@ -18,10 +18,7 @@ function Grid:init()
 
 end
 
--- print()
---
-function Grid:print()
-
+function Grid:__tostring()
 	local p = ""
 
 	for j=1, 4, 1 do
@@ -41,8 +38,7 @@ function Grid:print()
 
 	end
 
-	print(p)
-
+	return p
 end
 
 -- draw()
@@ -321,7 +317,7 @@ function Grid:initInputHandlers()
 
 	local gridInputHandlers = {
 		AButtonDown = function()
-			self:print()
+			print(self)
 		end,
 		leftButtonDown = function()
 			self:moveLeft()

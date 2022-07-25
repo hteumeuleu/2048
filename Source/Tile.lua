@@ -18,6 +18,10 @@ function Tile:init(value)
 
 end
 
+function Tile:__tostring()
+	return "Tile[" .. self.value .. "]"
+end
+
 -- initImage()
 --
 -- Creates the image to be drawn with the tile.
