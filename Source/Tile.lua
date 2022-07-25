@@ -48,11 +48,14 @@ end
 -- and a boolean indicating whether the Tile has merged with another or not.
 function Tile:slideTo(x, y)
 
+	self:removeAnimator()
+	self.animator = nil
 	local merged = false
 	local otherTile = nil
 	local useAnimator = false
 	local actualX, actualY, collisions, length
 	if not useAnimator then
+		self.animatorStartPoint = playdate.geometry.point.new(self.x, self.y)
 		actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
 	else
 		actualX, actualY, collisions, length = self:checkCollisions(x, y)
@@ -69,13 +72,11 @@ function Tile:slideTo(x, y)
 			end
 		end
 	end
-	if useAnimator then
+	if useAnimator or true then
 		-- Animation
-		local duration = 100
-		local startValue = playdate.geometry.point.new(self.x, self.y)
-		local endValue = playdate.geometry.point.new(actualX + self.width / 2, actualY + self.height / 2)
-		local animator = playdate.graphics.animator.new(duration, startValue, endValue)
-		self:setAnimator(animator)
+		self.animatorEndPoint = playdate.geometry.point.new(actualX, actualY)
+		self.animator = playdate.graphics.animator.new(100, self.animatorStartPoint, self.animatorEndPoint)
+		-- self:setAnimator(animator)
 	end
 	return actualX, actualY, merged, otherTile
 
