@@ -41,6 +41,50 @@ function Grid:__tostring()
 	return p
 end
 
+-- update()
+--
+function Grid:update()
+
+	if self.isAnimating then
+		local isStillAnimating = false
+
+
+		for _, col in ipairs(self.traversals.x) do
+			for _, row in ipairs(self.traversals.y) do
+				local i = self:getIndex(col, row)
+				local tile = self.tiles[i]
+				if tile ~= nil and tile ~= kEmptyTile then
+					if tile.animator ~= nil then
+						if not tile.animator:ended() then
+							isStillAnimating = true
+						else
+							if tile.mustBeRemoved then
+								tile:removeAnimator()
+								tile:remove()
+								self.tiles[i] = kEmptyTile
+							elseif tile.mustBeMerged then
+								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
+								tile:removeAnimator()
+								tile:remove()
+								self.tiles[i] = kEmptyTile
+								self:addTile(newCol, newRow, tile.value * 2)
+							else
+								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
+								self:moveTileInArray(i, self:getIndex(newCol, newRow))
+							end
+						end
+					end
+				end
+			end
+		end
+		if not isStillAnimating then
+			self.isAnimating = false
+		end
+	end
+
+
+end
+
 -- draw()
 --
 -- Draws the Grid background.
@@ -61,9 +105,21 @@ function Grid:initTiles()
 		kEmptyTile, kEmptyTile, kEmptyTile, kEmptyTile
 	}
 	self:addTile(1, 1, 2)
-	self:addTile(3, 3, 16)
+	self:addTile(1, 2, 2)
+	self:addTile(1, 3, 2)
 	self:addTile(1, 4, 2)
-	self:addTile(3, 1, 4)
+	self:addTile(2, 1, 4)
+	self:addTile(2, 2, 4)
+	self:addTile(2, 3, 4)
+	self:addTile(2, 4, 4)
+	self:addTile(3, 1, 8)
+	self:addTile(3, 2, 8)
+	self:addTile(3, 3, 8)
+	self:addTile(3, 4, 8)
+	self:addTile(4, 1, 16)
+	self:addTile(4, 2, 16)
+	self:addTile(4, 3, 16)
+	self:addTile(4, 4, 16)
 end
 
 -- moveTile()
@@ -147,10 +203,11 @@ function Grid:findFarthestPosition(i, vector)
 
 end
 
--- move(colTarget, rowTarget)
+-- move(direction)
 --
--- Apply moves inside the Grid in the direction of `colTarget` and `rowTarget`.
--- `colTarget` and `rowTarget` can be either 1 (left or up), 4 (right or down) or 0 (no movement).
+-- Apply moves inside the Grid in the direction of the number passed as a parameter.
+-- direction can be a value from 1 to 4
+-- 1=Up, 2=Right, 3=Down, 4=Left
 function Grid:move(direction)
 
 	if not self.isAnimating then
@@ -158,65 +215,22 @@ function Grid:move(direction)
 		local vector <const> = self:getVector(direction)
 		local traversals = self:buildTraversals(vector)
 		self.isAnimating = true
+		self.traversals = traversals
 
 		for _, col in ipairs(traversals.x) do
 			for _, row in ipairs(traversals.y) do
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
-					tile:removeAnimator()
 					local farthestCol, farthestRow = self:findFarthestPosition(i, vector)
 					local targetX, targetY = self:getDrawingPositionAt(farthestCol, farthestRow)
-					if targetX ~= tile.x or targetY ~= tile.y then
-						local actualX, actualY, merged, otherTile = tile:slideTo(targetX, targetY)
-						-- Merged
-						if merged and otherTile then
-							self.tiles[i].mustBeMerged = true
-							for j, t in ipairs(self.tiles) do
-								if t == otherTile then
-									self.tiles[j].mustBeRemoved = true
-								end
-							end
-						else
-							local newCol, newRow = self:getCoordsFromPosition(actualX, actualY)
-							self:moveTileInArray(i, self:getIndex(newCol, newRow))
-						end
-					end
-				end
-			end
-		end
-
-
-		for _, col in ipairs(traversals.x) do
-			for _, row in ipairs(traversals.y) do
-				local i = self:getIndex(col, row)
-				local tile = self.tiles[i]
-				if tile ~= nil and tile ~= kEmptyTile then
+					tile:slideTo(targetX, targetY)
 					if tile.animator ~= nil then
 						tile:setAnimator(tile.animator, false, false)
 					end
-					playdate.timer.performAfterDelay(100, function(tile, grid)
-						if tile.mustBeRemoved then
-							tile:removeAnimator()
-							tile:remove()
-							grid.tiles[i] = kEmptyTile
-						end
-						if tile.mustBeMerged then
-							local newCol, newRow = grid:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
-							local newValue = tile.value * 2
-							tile:removeAnimator()
-							tile:remove()
-							grid.tiles[i] = kEmptyTile
-							local newTile = grid:addTile(newCol, newRow, newValue)
-						end
-					end, tile, self)
 				end
 			end
 		end
-
-		playdate.timer.performAfterDelay(100, function(grid)
-			grid.isAnimating = false
-		end, self)
 
 	end
 

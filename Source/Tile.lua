@@ -1,6 +1,7 @@
 class('Tile').extends(playdate.graphics.sprite)
 
 local kTileCollisionGroup = 1
+local kTileSecretId = 1
 
 function Tile:init(value)
 
@@ -14,6 +15,8 @@ function Tile:init(value)
 	self:setGroups({kTileCollisionGroup})
 	self:setCollidesWithGroups({kTileCollisionGroup})
 	self:add()
+	self.secretId = kTileSecretId
+	kTileSecretId = kTileSecretId + 1
 	return self
 
 end
@@ -52,37 +55,27 @@ end
 -- and a boolean indicating whether the Tile has merged with another or not.
 function Tile:slideTo(x, y)
 
-	self:removeAnimator()
+	print("slideTo", self.secretId)
+	-- self:removeAnimator()
 	self.animator = nil
-	local merged = false
-	local otherTile = nil
-	local useAnimator = false
-	local actualX, actualY, collisions, length
-	if not useAnimator then
-		self.animatorStartPoint = playdate.geometry.point.new(self.x, self.y)
-		actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
-	else
-		actualX, actualY, collisions, length = self:checkCollisions(x, y)
-	end
+	self.animatorStartPoint = playdate.geometry.point.new(self.x, self.y)
+	local actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
+	print("-- move", playdate.geometry.point.new(x, y), playdate.geometry.point.new(actualX, actualY))
 	if length > 0 then
 		for _, collision in ipairs(collisions) do
 			local overlap = (collision.type == playdate.graphics.sprite.kCollisionTypeOverlap)
 			local sprite = collision.sprite
 			local other = collision.other
 			if overlap then
-				merged = true
-				otherTile = other
-				-- return actualX, actualY, merged, otherTile
+				sprite.mustBeRemoved = true
+				other.mustBeMerged = true
+				print("-- collision", "mustBeMerged=", other.secretId, "mustBeRemoved=", sprite.secretId, playdate.geometry.point.new(actualX, actualY))
 			end
 		end
 	end
-	if useAnimator or true then
-		-- Animation
-		self.animatorEndPoint = playdate.geometry.point.new(actualX, actualY)
-		self.animator = playdate.graphics.animator.new(100, self.animatorStartPoint, self.animatorEndPoint)
-		-- self:setAnimator(animator)
-	end
-	return actualX, actualY, merged, otherTile
+	self.animatorEndPoint = playdate.geometry.point.new(actualX, actualY)
+	self.animator = playdate.graphics.animator.new(100, self.animatorStartPoint, self.animatorEndPoint)
+	return actualX, actualY
 
 end
 
@@ -93,6 +86,10 @@ end
 -- Otherwise we want the Tile to be blocked (freeze).
 function Tile:collisionResponse(other)
 
+
+	if other.mustBeRemoved or other.mustBeMerged then
+		return playdate.graphics.sprite.kCollisionTypeFreeze
+	end
 	if other:getTag() == self:getTag() then
 		return playdate.graphics.sprite.kCollisionTypeOverlap
 	else
