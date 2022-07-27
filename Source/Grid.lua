@@ -112,7 +112,6 @@ function Grid:moveTileInArray(fromIndex, toIndex)
 	if fromIndex ~= toIndex and fromIndex >= 1 and toIndex <= #self.tiles then
 		self.tiles[toIndex] = self.tiles[fromIndex]
 		self.tiles[fromIndex] = kEmptyTile
-		self:setZIndex(toIndex)
 	end
 
 end
@@ -257,6 +256,7 @@ function Grid:move(direction)
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
+					tile:setZIndex(col * vector.x + row * vector.y)
 					local farthestCol, farthestRow = self:findFarthestPosition(i, vector)
 					local targetX, targetY = self:getDrawingPositionAt(farthestCol, farthestRow)
 					tile:slideTo(targetX, targetY)
