@@ -25,6 +25,16 @@ function Tile:__tostring()
 	return "Tile[" .. self.value .. "]"
 end
 
+function Tile:update()
+
+	if self.scaleAnimator ~= nil then
+		if not self.scaleAnimator:ended() then
+			self:setScale(self.scaleAnimator:currentValue())
+		end
+	end
+
+end
+
 -- initImage()
 --
 -- Creates the image to be drawn with the tile.

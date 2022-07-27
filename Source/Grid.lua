@@ -52,6 +52,11 @@ function Grid:update()
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
+					if tile.scaleAnimator ~= nil then
+						if not tile.scaleAnimator:ended() then
+							isStillAnimating = true
+						end
+					end
 					if tile.animator ~= nil then
 						if not tile.animator:ended() then
 							isStillAnimating = true
@@ -129,13 +134,20 @@ end
 -- addTile(col, row, value)
 --
 -- Creates a tile with `value` displayed at column `col` and row `row` inside the Grid.
-function Grid:addTile(col, row, value)
+function Grid:addTile(col, row, value, random)
 
 	local t = Tile(value)
 	t:moveTo(self:getDrawingPositionAt(col, row))
 	local i = self:getIndex(col, row)
 	self.tiles[i] = t
 	self:setZIndex(i)
+	if random == true then
+		self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.inBounce)
+		self.tiles[i].scaleAnimator.reverses = false
+	else
+		self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 1, 1.1034, playdate.easingFunctions.easeOut)
+		self.tiles[i].scaleAnimator.reverses = true
+	end
 
 end
 
@@ -152,7 +164,7 @@ function Grid:addRandomTile()
 			value = 4
 		end
 		local col, row = self:getCoords(self:randomAvailableCell())
-		self:addTile(col, row, value, false)
+		self:addTile(col, row, value, true)
 	end
 
 end
