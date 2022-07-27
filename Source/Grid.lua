@@ -12,8 +12,6 @@ function Grid:init()
 	self.image = self:createBackgroundImage()
 	self:draw()
 	self:initTiles()
-	self:initInputHandlers()
-	self.cursor = Cursor()
 	return self
 
 end
@@ -79,6 +77,7 @@ function Grid:update()
 		end
 		if not isStillAnimating then
 			self.isAnimating = false
+			self:addRandomTile()
 		end
 	end
 
@@ -104,22 +103,6 @@ function Grid:initTiles()
 		kEmptyTile, kEmptyTile, kEmptyTile, kEmptyTile,
 		kEmptyTile, kEmptyTile, kEmptyTile, kEmptyTile
 	}
-	self:addTile(1, 1, 2)
-	self:addTile(1, 2, 2)
-	self:addTile(1, 3, 2)
-	self:addTile(1, 4, 2)
-	self:addTile(2, 1, 4)
-	self:addTile(2, 2, 4)
-	self:addTile(2, 3, 4)
-	self:addTile(2, 4, 4)
-	self:addTile(3, 1, 8)
-	self:addTile(3, 2, 8)
-	self:addTile(3, 3, 8)
-	self:addTile(3, 4, 8)
-	self:addTile(4, 1, 16)
-	self:addTile(4, 2, 16)
-	self:addTile(4, 3, 16)
-	self:addTile(4, 4, 16)
 end
 
 -- moveTile()
@@ -154,6 +137,58 @@ function Grid:addTile(col, row, value)
 	local i = self:getIndex(col, row)
 	self.tiles[i] = t
 	self:setZIndex(i)
+
+end
+
+-- addRandomTile()
+--
+function Grid:addRandomTile()
+
+	if self:hasAvailableCells() then
+		math.randomseed(playdate.getSecondsSinceEpoch())
+		local value = math.random()
+		if value < 0.9 then
+			value = 2
+		else
+			value = 4
+		end
+		local col, row = self:getCoords(self:randomAvailableCell())
+		self:addTile(col, row, value, false)
+	end
+
+end
+
+-- randomAvailableCell()
+--
+function Grid:randomAvailableCell()
+
+	local cells = self:getAvailableCells()
+	if cells ~= nil and #cells > 0 then
+		math.randomseed(playdate.getSecondsSinceEpoch())
+		return cells[math.random(1, #cells)]
+	end
+
+end
+
+-- getAvailableCells()
+--
+function Grid:getAvailableCells()
+
+	local cells = {}
+	for i, cell in ipairs(self.tiles) do
+		if cell == kEmptyTile then
+			table.insert(cells, i)
+		end
+	end
+	return cells
+
+end
+
+-- hasAvailableCells()
+--
+function Grid:hasAvailableCells()
+
+	return #self:getAvailableCells() > 0
 
 end
 
@@ -321,76 +356,5 @@ function Grid:buildTraversals(vector)
 	end
 
 	return traversals
-
-end
-
--- initInputHandlers()
---
--- Add control handlers.
-function Grid:initInputHandlers()
-
-	local gridInputHandlers = {
-		AButtonDown = function()
-			print(self)
-		end,
-		leftButtonDown = function()
-			self:moveLeft()
-		end,
-		rightButtonDown = function()
-			self:moveRight()
-		end,
-		upButtonDown = function()
-			self:moveUp()
-		end,
-		downButtonDown = function()
-			self:moveDown()
-		end,
-		cranked = function()
-			local abs = playdate.getCrankPosition()
-			self.cursor:setAngle(abs)
-			self.cursor:add()
-			local function moveAfterCrank(abs)
-				if abs >= 45 and abs < 135 then
-					self:moveRight()
-				elseif abs >= 135 and abs < 225 then
-					self:moveDown()
-				elseif abs >= 225 and abs < 315 then
-					self:moveLeft()
-				elseif abs >= 315 or abs < 45 then
-					self:moveUp()
-				end
-			end
-			if(self.crankTimer ~= nil) then
-				self.crankTimer:remove()
-			end
-			self.crankTimer = playdate.timer.performAfterDelay(100, moveAfterCrank, abs)
-		end,
-	}
-	playdate.inputHandlers.push(gridInputHandlers)
-
-end
-
--- Shorthand functions for game movements
-function Grid:moveLeft()
-
-	self:move(4)
-
-end
-
-function Grid:moveRight()
-
-	self:move(2)
-
-end
-
-function Grid:moveUp()
-
-	self:move(1)
-
-end
-
-function Grid:moveDown()
-
-	self:move(3)
 
 end

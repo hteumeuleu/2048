@@ -32,16 +32,43 @@ end
 function Tile:initImage()
 
 	local img = playdate.graphics.image.new(self.width, self.height)
-	local kTileHeightOffset = math.floor(self.value / 4)
+	local kTileHeightOffset = 0
+	if self.value >= 2048 then
+		kTileHeightOffset = 10
+	elseif self.value >= 1024 then
+		kTileHeightOffset = 9
+	elseif self.value >= 512 then
+		kTileHeightOffset = 8
+	elseif self.value >= 256 then
+		kTileHeightOffset = 7
+	elseif self.value >= 128 then
+		kTileHeightOffset = 6
+	elseif self.value >= 64 then
+		kTileHeightOffset = 5
+	elseif self.value >= 32 then
+		kTileHeightOffset = 4
+	elseif self.value >= 16 then
+		kTileHeightOffset = 3
+	elseif self.value >= 8 then
+		kTileHeightOffset = 2
+	elseif self.value >= 4 then
+		kTileHeightOffset = 1
+	end
 	local kTileBorderSize = 2
 	playdate.graphics.pushContext(img)
 		-- Background
 		playdate.graphics.setColor(playdate.graphics.kColorBlack)
 		playdate.graphics.fillRoundRect(0, 0, self.width, self.height, gTileRadius)
 		-- Foreground
+		local innerTileWidth = self.width - (2 * kTileBorderSize)
+		local innerTileHeight = self.height - (2 * kTileBorderSize) - kTileHeightOffset
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
-		playdate.graphics.fillRoundRect(kTileBorderSize, kTileBorderSize, self.width - (2 * kTileBorderSize), self.height - (2 * kTileBorderSize) - kTileHeightOffset, gTileRadius)
-		playdate.graphics.drawTextInRect("*" .. self.value .. "*", 0, 16 - kTileHeightOffset, self.width, self.height, nil, nil, kTextAlignment.center)
+		playdate.graphics.fillRoundRect(kTileBorderSize, kTileBorderSize, self.width - (2 * kTileBorderSize), innerTileHeight, gTileRadius)
+		local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
+		local fontHeight = font:getHeight()
+		local arbitraryValueToFixFontHeightWeirdness = 2
+		local textY = (innerTileHeight - fontHeight) / 2 + kTileBorderSize + arbitraryValueToFixFontHeightWeirdness
+		playdate.graphics.drawTextInRect("*" .. self.value .. "*", 0, textY, self.width, self.height, nil, nil, kTextAlignment.center)
 	playdate.graphics.popContext()
 	self:setImage(img)
 
@@ -55,12 +82,9 @@ end
 -- and a boolean indicating whether the Tile has merged with another or not.
 function Tile:slideTo(x, y)
 
-	print("slideTo", self.secretId)
-	-- self:removeAnimator()
 	self.animator = nil
 	self.animatorStartPoint = playdate.geometry.point.new(self.x, self.y)
 	local actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
-	print("-- move", playdate.geometry.point.new(x, y), playdate.geometry.point.new(actualX, actualY))
 	if length > 0 then
 		for _, collision in ipairs(collisions) do
 			local overlap = (collision.type == playdate.graphics.sprite.kCollisionTypeOverlap)
@@ -69,7 +93,6 @@ function Tile:slideTo(x, y)
 			if overlap then
 				sprite.mustBeRemoved = true
 				other.mustBeMerged = true
-				print("-- collision", "mustBeMerged=", other.secretId, "mustBeRemoved=", sprite.secretId, playdate.geometry.point.new(actualX, actualY))
 			end
 		end
 	end
