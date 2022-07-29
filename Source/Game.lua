@@ -43,6 +43,9 @@ end
 --
 function Game:setup()
 
+	self.over = false
+	self.won = false
+	self.keepPlaying = false
 	self.grid = Grid()
 	self:addStartTiles()
 
@@ -55,6 +58,14 @@ function Game:addStartTiles()
 	for i=1, self.startTiles, 1 do
 		self.grid:addRandomTile()
 	end
+
+end
+
+-- hasAvailableMoves()
+--
+function Game:hasAvailableMoves()
+
+	return self.grid:hasAvailableMatches()
 
 end
 

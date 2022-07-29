@@ -10,6 +10,7 @@ function Grid:init()
 	self.width = gGridSize
 	self.height = gGridSize
 	self.image = self:createBackgroundImage()
+	self.score = Score()
 	self:draw()
 	self:initTiles()
 	return self
@@ -66,10 +67,13 @@ function Grid:update()
 								self.tiles[i] = kEmptyTile
 							elseif tile.mustBeMerged then
 								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
+								local newValue = tile.value * 2
 								tile:removeAnimator()
 								tile:remove()
 								self.tiles[i] = kEmptyTile
-								self:addTile(newCol, newRow, tile.value * 2)
+								self:addTile(newCol, newRow, newValue)
+								self.score:addToValue(newValue)
+								self.score:update()
 							elseif not tile.isNew then
 								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
 								self:moveTileInArray(i, self:getIndex(newCol, newRow))
@@ -136,27 +140,29 @@ end
 -- Creates a tile with `value` displayed at column `col` and row `row` inside the Grid.
 function Grid:addTile(col, row, value, random)
 
-	-- Create new tile with the new value
-	local t = Tile(value)
-	-- Move it to its col and row position on screen
-	t:moveTo(self:getDrawingPositionAt(col, row))
-	-- Get new index to place new tile in array
-	local i = self:getIndex(col, row)
-	-- If there's already a tile there we properly remove it
-	if self.tiles[i] ~= nil and self.tiles[i] ~= kEmptyTile then
-		self.tiles[i]:removeAnimator()
-		self.tiles[i]:remove()
-		self.tiles[i] = kEmptyTile
-	end
-	-- We set the new tile at this index
-	self.tiles[i] = t
-	-- We create an animator for this new tile
-	if random == true then
-		self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.inBounce)
-		self.tiles[i].scaleAnimator.reverses = false
-	else
-		self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 1, 1.1034, playdate.easingFunctions.easeOut)
-		self.tiles[i].scaleAnimator.reverses = true
+	if self:hasAvailableCells() then
+		-- Create new tile with the new value
+		local t = Tile(value)
+		-- Move it to its col and row position on screen
+		t:moveTo(self:getDrawingPositionAt(col, row))
+		-- Get new index to place new tile in array
+		local i = self:getIndex(col, row)
+		-- If there's already a tile there we properly remove it
+		if self.tiles[i] ~= nil and self.tiles[i] ~= kEmptyTile then
+			self.tiles[i]:removeAnimator()
+			self.tiles[i]:remove()
+			self.tiles[i] = kEmptyTile
+		end
+		-- We set the new tile at this index
+		self.tiles[i] = t
+		-- We create an animator for this new tile
+		if random == true then
+			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.inBounce)
+			self.tiles[i].scaleAnimator.reverses = false
+		else
+			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 1, 1.1034, playdate.easingFunctions.easeOut)
+			self.tiles[i].scaleAnimator.reverses = true
+		end
 	end
 
 end
@@ -323,7 +329,10 @@ end
 --
 function Grid:getIndex(col, row)
 
-	return ((row - 1) * 4) + col
+	if col >= 1 and col <= 4 and row >= 1 and row <= 4 then
+		return ((row - 1) * 4) + col
+	end
+	return -1
 
 end
 
@@ -394,5 +403,35 @@ function Grid:buildTraversals(vector)
 	end
 
 	return traversals
+
+end
+
+-- hasAvailableMatches()
+--
+-- Check for available matches between tiles (more expensive check)
+function Grid:hasAvailableMatches()
+
+	if self:hasAvailableCells() then
+		return true
+	end
+	local tile, x, y
+	for x=1, 4, 1 do
+		for y=1, 4, 1 do
+			tile = self.tiles[self:getIndex(x, y)]
+			if tile ~= nil and tile ~= kEmptyTile then
+				for direction=1, 4, 1 do
+					local vector = self:getVector(direction)
+					local other = self.tiles[self:getIndex(x + vector.x, y + vector.y)]
+					if other ~= nil and other ~= kEmptyTile then
+						if other.value == tile.value then
+							return true -- These two tiles can be merged
+						end
+					end
+				end
+
+			end
+		end
+	end
+	return false
 
 end
