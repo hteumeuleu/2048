@@ -3,14 +3,14 @@ class('Cursor').extends(playdate.graphics.sprite)
 local kCursorSize <const> = 32
 local kCursorRadius <const> = kCursorSize / 2
 local kCursorBorderSize <const> = 4
-local kImaginaryCircleRadius <const> = 120 - kCursorRadius
+local kImaginaryCircleRadius <const> = 124
 
 function Cursor:init()
 
 	Cursor.super.init(self)
 	self.width = kCursorSize
 	self.height = kCursorSize
-	self:setZIndex(0)
+	self:setZIndex(10)
 	self:initImage()
 	self:setCollisionsEnabled(false)
 	return self

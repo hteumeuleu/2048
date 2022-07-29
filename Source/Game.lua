@@ -94,6 +94,9 @@ function Game:initInputHandlers()
 			local abs = playdate.getCrankPosition()
 			self.cursor:setAngle(abs)
 			self.cursor:add()
+			local function hideCursorCallback()
+				self.cursor:remove()
+			end
 			local function afterCrankCallback(abs)
 				if abs >= 45 and abs < 135 then
 					self:moveRight()
@@ -104,6 +107,10 @@ function Game:initInputHandlers()
 				elseif abs >= 315 or abs < 45 then
 					self:moveUp()
 				end
+				self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
+			end
+			if(self.hideCursorTimer ~= nil) then
+				self.hideCursorTimer:remove()
 			end
 			if(self.crankTimer ~= nil) then
 				self.crankTimer:remove()
