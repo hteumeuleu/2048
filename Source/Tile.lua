@@ -9,6 +9,7 @@ function Tile:init(value)
 	self.value = value
 	self.width = gTileSize
 	self.height = gTileSize
+	self.isNew = true
 	self:initImage()
 	self:setCollideRect(gGridBorderSize / 2 * -1, gGridBorderSize / 2 * -1, self.width + gGridBorderSize, self.height + gGridBorderSize)
 	self:setTag(value)

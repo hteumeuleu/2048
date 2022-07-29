@@ -46,7 +46,6 @@ function Grid:update()
 	if self.isAnimating then
 		local isStillAnimating = false
 
-
 		for _, col in ipairs(self.traversals.x) do
 			for _, row in ipairs(self.traversals.y) do
 				local i = self:getIndex(col, row)
@@ -71,7 +70,7 @@ function Grid:update()
 								tile:remove()
 								self.tiles[i] = kEmptyTile
 								self:addTile(newCol, newRow, tile.value * 2)
-							else
+							elseif not tile.isNew then
 								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
 								self:moveTileInArray(i, self:getIndex(newCol, newRow))
 							end
@@ -81,6 +80,7 @@ function Grid:update()
 			end
 		end
 		if not isStillAnimating then
+			self.traversals = nil
 			self.isAnimating = false
 			self:addRandomTile()
 		end
@@ -114,7 +114,7 @@ end
 --
 function Grid:moveTileInArray(fromIndex, toIndex)
 
-	if fromIndex ~= toIndex and fromIndex >= 1 and toIndex <= #self.tiles then
+	if fromIndex ~= toIndex and fromIndex >= 1 and fromIndex <= #self.tiles and toIndex >= 1 and toIndex <= #self.tiles then
 		self.tiles[toIndex] = self.tiles[fromIndex]
 		self.tiles[fromIndex] = kEmptyTile
 	end
@@ -136,11 +136,21 @@ end
 -- Creates a tile with `value` displayed at column `col` and row `row` inside the Grid.
 function Grid:addTile(col, row, value, random)
 
+	-- Create new tile with the new value
 	local t = Tile(value)
+	-- Move it to its col and row position on screen
 	t:moveTo(self:getDrawingPositionAt(col, row))
+	-- Get new index to place new tile in array
 	local i = self:getIndex(col, row)
+	-- If there's already a tile there we properly remove it
+	if self.tiles[i] ~= nil and self.tiles[i] ~= kEmptyTile then
+		self.tiles[i]:removeAnimator()
+		self.tiles[i]:remove()
+		self.tiles[i] = kEmptyTile
+	end
+	-- We set the new tile at this index
 	self.tiles[i] = t
-	self:setZIndex(i)
+	-- We create an animator for this new tile
 	if random == true then
 		self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.inBounce)
 		self.tiles[i].scaleAnimator.reverses = false
@@ -258,6 +268,7 @@ function Grid:move(direction)
 
 	if not self.isAnimating then
 
+		self:prepareTiles()
 		local vector <const> = self:getVector(direction)
 		local traversals = self:buildTraversals(vector)
 		self.isAnimating = true
@@ -279,6 +290,21 @@ function Grid:move(direction)
 			end
 		end
 
+	end
+
+end
+
+function Grid:prepareTiles()
+
+	for _, tile in ipairs(self.tiles) do
+		if tile ~= nil and tile ~= kEmptyTile then
+			tile:setScale(1)
+			tile.isNew = false
+			tile.scaleAnimator = nil
+			tile.animator = nil
+			tile.mustBeRemoved = nil
+			tile.mustBeMerged = nil
+		end
 	end
 
 end
