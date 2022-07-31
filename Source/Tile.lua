@@ -43,28 +43,10 @@ end
 function Tile:initImage()
 
 	local img = playdate.graphics.image.new(self.width, self.height)
-	local kTileHeightOffset = 0
-	if self.value >= 2048 then
-		kTileHeightOffset = 10
-	elseif self.value >= 1024 then
-		kTileHeightOffset = 9
-	elseif self.value >= 512 then
-		kTileHeightOffset = 8
-	elseif self.value >= 256 then
-		kTileHeightOffset = 7
-	elseif self.value >= 128 then
-		kTileHeightOffset = 6
-	elseif self.value >= 64 then
-		kTileHeightOffset = 5
-	elseif self.value >= 32 then
-		kTileHeightOffset = 4
-	elseif self.value >= 16 then
-		kTileHeightOffset = 3
-	elseif self.value >= 8 then
-		kTileHeightOffset = 2
-	elseif self.value >= 4 then
-		kTileHeightOffset = 1
+	function log2(n)
+		return math.floor(math.log10(n) / math.log10(2) + 0.5)
 	end
+	local kTileHeightOffset = math.min(10, log2(self.value))
 	local kTileBorderSize = 2
 	playdate.graphics.pushContext(img)
 		-- Background
