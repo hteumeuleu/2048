@@ -162,7 +162,7 @@ function Grid:addTile(col, row, value, random)
 		self.tiles[i] = t
 		-- We create an animator for this new tile
 		if random == true then
-			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.inBounce)
+			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.inBounce, 100)
 			self.tiles[i].scaleAnimator.reverses = false
 		else
 			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 1, 1.1034, playdate.easingFunctions.easeOut)
