@@ -53,7 +53,7 @@ function Grid:update()
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
-					if tile.moved then
+					if tile.moved or tile.mustBeMerged then
 						hasMoved = true
 					end
 					if tile.scaleAnimator ~= nil then
