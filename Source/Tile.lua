@@ -75,9 +75,14 @@ end
 -- and a boolean indicating whether the Tile has merged with another or not.
 function Tile:slideTo(x, y)
 
+	local previousX = self.x
+	local previousY = self.y
 	self.animator = nil
-	self.animatorStartPoint = playdate.geometry.point.new(self.x, self.y)
+	self.animatorStartPoint = playdate.geometry.point.new(previousX, previousY)
 	local actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
+	if actualX ~= previousX or actualY ~= previousY then
+		self.moved = true
+	end
 	if length > 0 then
 		for _, collision in ipairs(collisions) do
 			local overlap = (collision.type == playdate.graphics.sprite.kCollisionTypeOverlap)

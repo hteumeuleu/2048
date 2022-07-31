@@ -46,12 +46,16 @@ function Grid:update()
 
 	if self.isAnimating then
 		local isStillAnimating = false
+		local hasMoved = false
 
 		for _, col in ipairs(self.traversals.x) do
 			for _, row in ipairs(self.traversals.y) do
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
+					if tile.moved then
+						hasMoved = true
+					end
 					if tile.scaleAnimator ~= nil then
 						if not tile.scaleAnimator:ended() then
 							isStillAnimating = true
@@ -86,10 +90,11 @@ function Grid:update()
 		if not isStillAnimating then
 			self.traversals = nil
 			self.isAnimating = false
-			self:addRandomTile()
+			if hasMoved then
+				self:addRandomTile()
+			end
 		end
 	end
-
 
 end
 
@@ -305,6 +310,7 @@ function Grid:prepareTiles()
 	for _, tile in ipairs(self.tiles) do
 		if tile ~= nil and tile ~= kEmptyTile then
 			tile:setScale(1)
+			tile.moved = false
 			tile.isNew = false
 			tile.scaleAnimator = nil
 			tile.animator = nil
