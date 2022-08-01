@@ -44,6 +44,11 @@ end
 --
 function Grid:update()
 
+	if self.shakeAnimator ~= nil and not self.shakeAnimator:ended() then
+		playdate.clearConsole()
+		print(self.shakeAnimator:currentValue())
+		playdate.display.setOffset(self.shakeAnimator:currentValue().x, self.shakeAnimator:currentValue().y)
+	end
 	if self.isAnimating then
 		local isStillAnimating = false
 		local hasMoved = false
@@ -281,12 +286,11 @@ function Grid:move(direction)
 
 		self:prepareTiles()
 		local vector <const> = self:getVector(direction)
-		local traversals = self:buildTraversals(vector)
-		self.isAnimating = true
-		self.traversals = traversals
+		self.traversals = self:buildTraversals(vector)
+		local hasMoved = false
 
-		for _, col in ipairs(traversals.x) do
-			for _, row in ipairs(traversals.y) do
+		for _, col in ipairs(self.traversals.x) do
+			for _, row in ipairs(self.traversals.y) do
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
@@ -297,8 +301,17 @@ function Grid:move(direction)
 					if tile.animator ~= nil then
 						tile:setAnimator(tile.animator, false, false)
 					end
+					if tile.moved or tile.mustBeMerged then
+						hasMoved = true
+					end
 				end
 			end
+		end
+
+		if hasMoved then
+			self.isAnimating = true
+		else
+			self:shake(vector)
 		end
 
 	end
@@ -439,5 +452,15 @@ function Grid:hasAvailableMatches()
 		end
 	end
 	return false
+
+end
+
+function Grid:shake(vector)
+
+	local startPoint = playdate.geometry.point.new(vector.x * -1, vector.y * -1)
+	local endPoint = playdate.geometry.point.new(vector.x * 1, vector.y * 1)
+	self.shakeAnimator = playdate.graphics.animator.new(100, startPoint, endPoint, playdate.easingFunctions.inBounce, 100)
+	self.shakeAnimator.reverses = true
+	self.shakeAnimator.repeatCount = 2
 
 end
