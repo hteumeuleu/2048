@@ -10,7 +10,9 @@ function Grid:init()
 	self.width = gGridSize
 	self.height = gGridSize
 	self.image = self:createBackgroundImage()
-	self.score = Score()
+	self.score = Score("Score", 24)
+	self.bestScore = Score("Best", 64)
+	self.bestScore:load()
 	self:draw()
 	self:initTiles()
 	return self
@@ -45,8 +47,6 @@ end
 function Grid:update()
 
 	if self.shakeAnimator ~= nil and not self.shakeAnimator:ended() then
-		playdate.clearConsole()
-		print(self.shakeAnimator:currentValue())
 		playdate.display.setOffset(self.shakeAnimator:currentValue().x, self.shakeAnimator:currentValue().y)
 	end
 	if self.isAnimating then
@@ -83,6 +83,11 @@ function Grid:update()
 								self:addTile(newCol, newRow, newValue)
 								self.score:addToValue(newValue)
 								self.score:update()
+								if self.score:getValue() > self.bestScore:getValue() then
+									self.bestScore:setValue(self.score:getValue())
+									self.bestScore:update()
+									self.bestScore:save()
+								end
 							elseif not tile.isNew then
 								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)
 								self:moveTileInArray(i, self:getIndex(newCol, newRow))
