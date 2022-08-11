@@ -19,17 +19,9 @@ gTileSize = 50
 gTileRadius = 2
 gMove = gGridBorderSize + gTileSize
 
-local game = Game()
+playdate.graphics.setBackgroundColor(playdate.graphics.kColorBlack)
 
--- Background drawing callback.
--- Because we use a sprite, we need to have this callback.
-playdate.graphics.sprite.setBackgroundDrawingCallback(
-	function(x, y, width, height)
-		playdate.graphics.setClipRect(x, y, width, height)
-			game.grid:draw()
-		playdate.graphics.clearClipRect()
-	end
-)
+local game = Game()
 
 -- playdate.update()
 --

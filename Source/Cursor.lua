@@ -1,9 +1,9 @@
 class('Cursor').extends(playdate.graphics.sprite)
 
-local kCursorSize <const> = 32
+local kCursorSize <const> = 24
 local kCursorRadius <const> = kCursorSize / 2
 local kCursorBorderSize <const> = 4
-local kImaginaryCircleRadius <const> = 124
+local kImaginaryCircleRadius <const> = 120 - kCursorRadius
 
 function Cursor:init()
 
@@ -22,7 +22,7 @@ end
 function Cursor:setAngle(angle)
 
 	self.angle = math.rad(angle - 90)
-	local x = 200 + math.cos(self.angle) * kImaginaryCircleRadius
+	local x = 400 - (gGridSize / 2) + math.cos(self.angle) * kImaginaryCircleRadius
 	local y = 120 + math.sin(self.angle) * kImaginaryCircleRadius
 	self:moveTo(x, y)
 

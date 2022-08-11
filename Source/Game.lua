@@ -11,6 +11,7 @@ function Game:init()
 	playdate.graphics.sprite.setBackgroundDrawingCallback(
 		function(x, y, width, height)
 			playdate.graphics.setClipRect(x, y, width, height)
+				self:drawTitle()
 				self.grid:draw()
 			playdate.graphics.clearClipRect()
 		end
@@ -66,6 +67,18 @@ end
 function Game:hasAvailableMoves()
 
 	return self.grid:hasAvailableMatches()
+
+end
+
+-- drawTitle()
+--
+function Game:drawTitle()
+
+	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+	local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
+	playdate.graphics.setFont(font)
+	playdate.graphics.drawTextInRect("*2048*", 8, 8 + (50 - font:getHeight()) / 2, 144, font:getHeight(), nil, nil, kTextAlignment.center)
+	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
 
 end
 

@@ -5,13 +5,13 @@ local kEmptyTile <const> = 0
 function Grid:init()
 
 	Grid.super.init(self)
-	self.x = (400 - gGridSize) / 2
+	self.x = (400 - gGridSize)
 	self.y = (240 - gGridSize) / 2
 	self.width = gGridSize
 	self.height = gGridSize
 	self.image = self:createBackgroundImage()
-	self.score = Score("Score", 24)
-	self.bestScore = Score("Best", 64)
+	self.score = Score("Score")
+	self.bestScore = Score("Best")
 	self.bestScore:load()
 	self:draw()
 	self:initTiles()
@@ -375,6 +375,8 @@ function Grid:createBackgroundImage()
 
 	local img = playdate.graphics.image.new(self.width, self.height)
 	playdate.graphics.pushContext(img)
+		playdate.graphics.setColor(playdate.graphics.kColorWhite)
+		playdate.graphics.fillRoundRect(0, 0, self.width, self.width, 6)
 		playdate.graphics.setPattern({0x77, 0xFF, 0xDD, 0xFF, 0x77, 0xFF, 0xDD, 0xFF})
 		for y=1,4,1
 		do
@@ -382,7 +384,7 @@ function Grid:createBackgroundImage()
 			do
 				local cellX = (gGridBorderSize * x) + (gTileSize * (x - 1))
 				local cellY = (gGridBorderSize * y) + (gTileSize * (y - 1))
-				playdate.graphics.fillRoundRect(cellX, cellY, gTileSize, gTileSize, gTileRadius)
+				playdate.graphics.fillRoundRect(cellX, cellY, gTileSize, gTileSize, 3)
 			end
 		end
 	playdate.graphics.popContext()
