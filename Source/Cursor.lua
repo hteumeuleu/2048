@@ -12,6 +12,7 @@ function Cursor:init()
 	self.height = kCursorSize
 	self:setZIndex(10)
 	self:initImage()
+	self:initAnimator()
 	self:setCollisionsEnabled(false)
 	return self
 
@@ -21,10 +22,19 @@ end
 --
 function Cursor:setAngle(angle)
 
-	self.angle = math.rad(angle - 90)
-	local x = 400 - (gGridSize / 2) + math.cos(self.angle) * kImaginaryCircleRadius
-	local y = 120 + math.sin(self.angle) * kImaginaryCircleRadius
-	self:moveTo(x, y)
+	local p = self.animator:valueAtTime(angle + 45)
+	self:moveTo(p)
+
+end
+
+-- initAnimator
+--
+function Cursor:initAnimator()
+
+	local polygon = playdate.geometry.polygon.new(400 - gGridSize + kCursorRadius, kCursorRadius, 400 - kCursorRadius, kCursorRadius, 400 - kCursorRadius, 240 - kCursorRadius, 400 - gGridSize + kCursorRadius, 240 - kCursorRadius)
+	polygon:close()
+	self.animator = playdate.graphics.animator.new(360, {polygon}, playdate.easingFunctions.linear)
+	self.animator.repeatCount = -1
 
 end
 
