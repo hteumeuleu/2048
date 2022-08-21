@@ -18,12 +18,55 @@ function Cursor:init()
 
 end
 
+-- function Cursor:add()
+
+-- 	Cursor.super:add(self)
+-- 	self:setScale(1)
+
+-- end
+
+function Cursor:update()
+
+	Cursor.super:update(self)
+
+	if self.hideAnimator ~= nil then
+		if not self.hideAnimator:ended() then
+			self:setScale(self.hideAnimator:currentValue())
+		else
+			print("remove")
+			self:remove()
+		end
+	end
+end
+
 -- setAngle(angle)
 --
 function Cursor:setAngle(angle)
 
 	local p = self.animator:valueAtTime(angle + 45)
 	self:moveTo(p)
+
+end
+
+-- show
+--
+function Cursor:show()
+
+	self.hideAnimator = nil
+	self:setScale(1)
+	self:add()
+
+end
+
+-- hide
+--
+function Cursor:hide()
+
+	if self.hideAnimator ~= nil then
+		self.hideAnimator:reset()
+	else
+		self.hideAnimator = playdate.graphics.animator.new(300, 1, 0, playdate.easingFunctions.inOutCubic)
+	end
 
 end
 

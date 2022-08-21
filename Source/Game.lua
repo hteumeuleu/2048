@@ -106,9 +106,9 @@ function Game:initInputHandlers()
 		cranked = function()
 			local abs = playdate.getCrankPosition()
 			self.cursor:setAngle(abs)
-			self.cursor:add()
+			self.cursor:show()
 			local function hideCursorCallback()
-				self.cursor:remove()
+				self.cursor:hide()
 			end
 			local function afterCrankCallback(abs)
 				if abs >= 45 and abs < 135 then
