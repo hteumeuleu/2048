@@ -14,7 +14,7 @@ function Score:init(text)
 	scoreObjectIndex = scoreObjectIndex + 1
 	self:drawImage()
 	self:setCollisionsEnabled(false)
-	self:moveTo(8 + (8 + self.width) * (self.index - 1) + (self.width / 2), 8 + 50 + 8 + (self.height / 2))
+	self:moveTo(8 + (8 + self.width) * (self.index - 1) + (self.width / 2), 8 + (self.height / 2))
 	self:add()
 	return self
 

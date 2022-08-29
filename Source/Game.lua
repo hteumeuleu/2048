@@ -11,7 +11,8 @@ function Game:init()
 	playdate.graphics.sprite.setBackgroundDrawingCallback(
 		function(x, y, width, height)
 			playdate.graphics.setClipRect(x, y, width, height)
-				self:drawTitle()
+				self:drawVirtualScreen()
+				self:drawButton()
 				self.grid:draw()
 			playdate.graphics.clearClipRect()
 		end
@@ -70,16 +71,34 @@ function Game:hasAvailableMoves()
 
 end
 
--- drawTitle()
+-- drawButton()
 --
-function Game:drawTitle()
+function Game:drawButton()
+
+	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+	local defaultFont = playdate.graphics.getSystemFont()
+	local defaultFontHeight = defaultFont:getHeight()
+	playdate.graphics.setFont(defaultFont)
+	playdate.graphics.drawText("Ⓐ", 8, 240 - (gGridBorderSize / 2) - defaultFontHeight)
+	playdate.graphics.setFont(gFontFullCircle)
+	playdate.graphics.drawText(string.upper("New Game"), 32, 240 - (gGridBorderSize / 2) - defaultFont:getHeight() + 2)
+	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
+
+end
+
+-- drawVirtualScreen()
+--
+function Game:drawVirtualScreen()
+
+	playdate.graphics.setPattern({0x0, 0x0, 0x8, 0x10, 0x20, 0x40, 0x80, 0x0})
+	playdate.graphics.fillRoundRect(gGridBorderSize, gGridBorderSize + 50 + gGridBorderSize, 144, 144, 4)
 
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
 	local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
 	playdate.graphics.setFont(font)
-	playdate.graphics.drawTextInRect("*2048*", 8, 8 + (50 - font:getHeight()) / 2, 144, font:getHeight(), nil, nil, kTextAlignment.center)
+	playdate.graphics.drawTextInRect("*2048*", 8, 8 + 50 + 8 + (144 - font:getHeight()) / 2, 144, font:getHeight(), nil, nil, kTextAlignment.center)
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
-
+		
 end
 
 -- initInputHandlers()
