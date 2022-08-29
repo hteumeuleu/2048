@@ -74,7 +74,7 @@ end
 --
 function Cursor:initAnimator()
 
-	local polygon = playdate.geometry.polygon.new(400 - gGridSize + kCursorRadius, kCursorRadius, 400 - kCursorRadius, kCursorRadius, 400 - kCursorRadius, 240 - kCursorRadius, 400 - gGridSize + kCursorRadius, 240 - kCursorRadius)
+	local polygon = playdate.geometry.polygon.new(400 - gGridSize + kCursorRadius, kCursorRadius + 4, 400 - kCursorRadius, kCursorRadius, 400 - kCursorRadius, 240 - kCursorRadius, 400 - gGridSize + kCursorRadius, 240 - kCursorRadius)
 	polygon:close()
 	self.animator = playdate.graphics.animator.new(360, {polygon}, playdate.easingFunctions.linear)
 	self.animator.repeatCount = -1
