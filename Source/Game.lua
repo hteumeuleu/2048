@@ -5,19 +5,6 @@ function Game:init()
 	Game.super.init(self)
 	self.startTiles = 2
 	self.cursor = Cursor()
-
-	-- Background drawing callback.
-	-- Because we use a sprite, we need to have this callback.
-	playdate.graphics.sprite.setBackgroundDrawingCallback(
-		function(x, y, width, height)
-			playdate.graphics.setClipRect(x, y, width, height)
-				self:drawVirtualScreen()
-				self:drawButton()
-				self.grid:draw()
-			playdate.graphics.clearClipRect()
-		end
-	)
-
 	self:initInputHandlers()
 	self:setup()
 
@@ -37,7 +24,26 @@ end
 --
 function Game:restart()
 
+	playdate.graphics.sprite.removeAll()
 	self:setup()
+
+end
+
+-- setBackgroundDrawingCallback()
+--
+function Game:setBackgroundDrawingCallback()
+
+	-- Background drawing callback.
+	-- Because we use a sprite, we need to have this callback.
+	playdate.graphics.sprite.setBackgroundDrawingCallback(
+		function(x, y, width, height)
+			playdate.graphics.setClipRect(x, y, width, height)
+				self:drawVirtualScreen()
+				self:drawButton()
+				self.grid:draw()
+			playdate.graphics.clearClipRect()
+		end
+	)
 
 end
 
@@ -50,6 +56,7 @@ function Game:setup()
 	self.keepPlaying = false
 	self.grid = Grid()
 	self:addStartTiles()
+	self:setBackgroundDrawingCallback()
 
 end
 
@@ -79,7 +86,7 @@ function Game:drawButton()
 	local defaultFont = playdate.graphics.getSystemFont()
 	local defaultFontHeight = defaultFont:getHeight()
 	playdate.graphics.setFont(defaultFont)
-	playdate.graphics.drawText("Ⓐ", 8, 240 - (gGridBorderSize / 2) - defaultFontHeight)
+	playdate.graphics.drawText("Ⓑ", 8, 240 - (gGridBorderSize / 2) - defaultFontHeight)
 	playdate.graphics.setFont(gFontFullCircle)
 	playdate.graphics.drawText(string.upper("New Game"), 32, 240 - (gGridBorderSize / 2) - defaultFont:getHeight() + 2)
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
@@ -109,6 +116,9 @@ function Game:initInputHandlers()
 	local gameInputHandlers = {
 		AButtonDown = function()
 			print(self.grid)
+		end,
+		BButtonDown = function()
+			self:restart()
 		end,
 		leftButtonDown = function()
 			self:moveLeft()

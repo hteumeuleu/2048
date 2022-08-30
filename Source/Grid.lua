@@ -10,6 +10,7 @@ function Grid:init()
 	self.width = gGridSize
 	self.height = gGridSize
 	self.image = self:createBackgroundImage()
+	scoreObjectIndex = 1
 	self.score = Score("Score")
 	self.bestScore = Score("Best")
 	self.bestScore:load()
