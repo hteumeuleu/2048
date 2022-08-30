@@ -25,9 +25,30 @@ end
 
 -- end
 
+function Cursor:addCircleAnimation()
+
+	print("addCircleAnimation")
+	self.circleAnimator = playdate.graphics.animator.new(500, 0, 100)
+
+end
+
+function Cursor:resetCircleAnimation()
+
+	if self.circleAnimator ~= nil then
+		self.circleAnimator:reset()
+	else
+		self:addCircleAnimation()
+	end
+
+end
+
 function Cursor:update()
 
 	Cursor.super:update(self)
+
+	if self.circleAnimator ~= nil and not self.circleAnimator:ended() then
+		self:initImage()
+	end
 
 	if self.hideAnimator ~= nil then
 		if not self.hideAnimator:ended() then
@@ -101,6 +122,13 @@ function Cursor:initImage()
 		playdate.graphics.setStrokeLocation(playdate.graphics.kStrokeInside)
 		playdate.graphics.setLineWidth(kCursorBorderSize)
 		playdate.graphics.drawCircleInRect(0 + offset, 0, self.width - (offset * 2), self.height - (offset * 2), kCursorRadius)
+		-- Inner Circle
+		if self.circleAnimator ~= nil and not self.circleAnimator:ended() then
+			local innerCircleRadius = kCursorRadius - (offset * 2)
+			local r = self.circleAnimator:currentValue() * innerCircleRadius / 100
+			playdate.graphics.setColor(playdate.graphics.kColorBlack)
+			playdate.graphics.fillCircleAtPoint(self.width / 2, self.height / 2 - offset, r)
+		end
 	playdate.graphics.popContext()
 	self:setImage(img)
 

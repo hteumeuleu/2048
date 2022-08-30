@@ -151,13 +151,17 @@ function Game:initInputHandlers()
 				end
 				self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
 			end
+			-- Growing circle animation
+			self.cursor:resetCircleAnimation()
+			-- Remove the timer to hide the cursor
 			if(self.hideCursorTimer ~= nil) then
 				self.hideCursorTimer:remove()
 			end
+			-- Remove the timer that executes the action
 			if(self.crankTimer ~= nil) then
 				self.crankTimer:remove()
 			end
-			self.crankTimer = playdate.timer.performAfterDelay(100, afterCrankCallback, abs)
+			self.crankTimer = playdate.timer.performAfterDelay(500, afterCrankCallback, abs)
 		end,
 	}
 	playdate.inputHandlers.push(gameInputHandlers)
