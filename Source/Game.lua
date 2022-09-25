@@ -17,6 +17,20 @@ end
 function Game:update()
 
 	self.grid:update()
+	if self.restartTimer ~= nil then
+		self:drawButton()
+	end
+
+end
+
+-- cancelRestartTimer()
+--
+function Game:cancelRestartTimer()
+
+	if self.restartTimer ~= nil then
+		self.restartTimer:remove()
+		self.restartTimer = nil
+	end
 
 end
 
@@ -55,6 +69,7 @@ function Game:setup()
 	self.won = false
 	self.keepPlaying = false
 	self.grid = Grid()
+	self:cancelRestartTimer()
 	self:addStartTiles()
 	self:setBackgroundDrawingCallback()
 
@@ -82,13 +97,23 @@ end
 --
 function Game:drawButton()
 
-	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
 	local defaultFont = playdate.graphics.getSystemFont()
 	local defaultFontHeight = defaultFont:getHeight()
-	playdate.graphics.setFont(defaultFont)
-	playdate.graphics.drawText("Ⓑ", 8, 240 - (gGridBorderSize / 2) - defaultFontHeight)
-	playdate.graphics.setFont(gFontFullCircle)
-	playdate.graphics.drawText(string.upper("New Game"), 32, 240 - (gGridBorderSize / 2) - defaultFont:getHeight() + 2)
+
+	if self.restartTimer ~= nil then
+		playdate.graphics.setLineWidth(2)
+		playdate.graphics.setColor(playdate.graphics.kColorWhite)
+		local circleY = 240 - (gGridBorderSize / 2) - defaultFontHeight
+		local circleRadius = 12
+		local endAngle = math.max(1, math.floor((self.restartTimer.currentTime * 360) / self.restartTimer.duration))
+		playdate.graphics.drawArc(8 + (circleRadius / 2) + 3, circleY + (circleRadius / 2) + 3, circleRadius, 0, endAngle)
+	end
+
+	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+		playdate.graphics.setFont(defaultFont)
+		playdate.graphics.drawText("Ⓐ", 8, 240 - (gGridBorderSize / 2) - defaultFontHeight)
+		playdate.graphics.setFont(gFontFullCircle)
+		playdate.graphics.drawText(string.upper("New Game"), 32, 240 - (gGridBorderSize / 2) - defaultFont:getHeight() + 2)
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
 
 end
@@ -101,11 +126,11 @@ function Game:drawVirtualScreen()
 	playdate.graphics.fillRoundRect(gGridBorderSize, gGridBorderSize + 50 + gGridBorderSize, 144, 144, 4)
 
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
-	local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
-	playdate.graphics.setFont(font)
-	playdate.graphics.drawTextInRect("*2048*", 8, 8 + 50 + 8 + (144 - font:getHeight()) / 2, 144, font:getHeight(), nil, nil, kTextAlignment.center)
+		local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
+		playdate.graphics.setFont(font)
+		playdate.graphics.drawTextInRect("*2048*", 8, 8 + 50 + 8 + (144 - font:getHeight()) / 2, 144, font:getHeight(), nil, nil, kTextAlignment.center)
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
-		
+
 end
 
 -- initInputHandlers()
@@ -114,11 +139,19 @@ end
 function Game:initInputHandlers()
 
 	local gameInputHandlers = {
-		AButtonDown = function()
+		BButtonDown = function()
 			print(self.grid)
 		end,
-		BButtonDown = function()
-			self:restart()
+		AButtonUp = function()
+			if self.restartTimer ~= nil then
+				self:cancelRestartTimer()
+			end
+			self.restartTimer = nil
+		end,
+		AButtonDown = function()
+			self.restartTimer = playdate.timer.new(1000, function()
+				self:restart()
+			end)
 		end,
 		leftButtonDown = function()
 			self:moveLeft()
