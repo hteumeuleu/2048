@@ -17,7 +17,7 @@ end
 function Game:update()
 
 	self.grid:update()
-	if self.restartTimer ~= nil then
+	if self.restartTimer ~= nil or self.restartCooldownTimer ~= nil then
 		self:drawButton()
 	end
 
@@ -30,9 +30,31 @@ function Game:cancelRestartTimer()
 	if self.restartTimer ~= nil then
 		self.restartTimer:remove()
 		self.restartTimer = nil
+		local timerDuration = self.restartTimerDuration / 2
+		self.restartCooldownTimer = playdate.timer.new(timerDuration)
 	end
 
 end
+
+-- startRestartTimer()
+--
+function Game:startRestartTimer()
+
+
+	if self.restartCooldownTimer ~= nil then
+		self.restartCooldownTimer:remove()
+		self.restartCooldownTimer = nil
+	end
+	local timerDuration = self.restartTimerDuration
+	self.restartTimer = playdate.timer.new(timerDuration, function()
+		self:restart()
+		self.restartTimerAngle = 1
+		self.restartTimerCooldownAngle = 1
+	end)
+
+end
+
+
 
 -- restart()
 --
@@ -68,6 +90,10 @@ function Game:setup()
 	self.over = false
 	self.won = false
 	self.keepPlaying = false
+	self.restartTimer = nil
+	self.restartTimerDuration = 1000
+	self.restartTimerAngle = 1
+	self.restartTimerCooldownAngle = 1
 	self.grid = Grid()
 	self:cancelRestartTimer()
 	self:addStartTiles()
@@ -100,12 +126,19 @@ function Game:drawButton()
 	local defaultFont = playdate.graphics.getSystemFont()
 	local defaultFontHeight = defaultFont:getHeight()
 
-	if self.restartTimer ~= nil then
+	if self.restartTimer ~= nil or self.restartCooldownTimer ~= nil then
 		playdate.graphics.setLineWidth(2)
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
 		local circleY = 240 - (gGridBorderSize / 2) - defaultFontHeight
 		local circleRadius = 12
-		local endAngle = math.max(1, math.floor((self.restartTimer.currentTime * 360) / self.restartTimer.duration))
+		local endAngle = 1
+		if self.restartTimer ~= nil then
+			endAngle = map(self.restartTimer.currentTime, 0, self.restartTimer.duration, self.restartTimerCooldownAngle, 360)
+			self.restartTimerAngle = endAngle
+		elseif self.restartCooldownTimer ~= nil then
+			endAngle = map(self.restartCooldownTimer.currentTime, 0, self.restartCooldownTimer.duration, self.restartTimerAngle, 1)
+			self.restartTimerCooldownAngle = endAngle
+		end
 		playdate.graphics.drawArc(8 + (circleRadius / 2) + 3, circleY + (circleRadius / 2) + 3, circleRadius, 0, endAngle)
 	end
 
@@ -143,15 +176,10 @@ function Game:initInputHandlers()
 			print(self.grid)
 		end,
 		AButtonUp = function()
-			if self.restartTimer ~= nil then
-				self:cancelRestartTimer()
-			end
-			self.restartTimer = nil
+			self:cancelRestartTimer()
 		end,
 		AButtonDown = function()
-			self.restartTimer = playdate.timer.new(1000, function()
-				self:restart()
-			end)
+			self:startRestartTimer()
 		end,
 		leftButtonDown = function()
 			self:moveLeft()
