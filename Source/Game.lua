@@ -74,7 +74,7 @@ function Game:setBackgroundDrawingCallback()
 	playdate.graphics.sprite.setBackgroundDrawingCallback(
 		function(x, y, width, height)
 			playdate.graphics.setClipRect(x, y, width, height)
-				self:drawVirtualScreen()
+				-- self:drawVirtualScreen()
 				self:drawButton()
 				self.grid:draw()
 			playdate.graphics.clearClipRect()
