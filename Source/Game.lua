@@ -193,36 +193,39 @@ function Game:initInputHandlers()
 		downButtonDown = function()
 			self:moveDown()
 		end,
-		cranked = function()
-			local abs = playdate.getCrankPosition()
-			self.cursor:setAngle(abs)
-			self.cursor:show()
-			local function hideCursorCallback()
-				self.cursor:hide()
-			end
-			local function afterCrankCallback(abs)
-				if abs >= 45 and abs < 135 then
-					self:moveRight()
-				elseif abs >= 135 and abs < 225 then
-					self:moveDown()
-				elseif abs >= 225 and abs < 315 then
-					self:moveLeft()
-				elseif abs >= 315 or abs < 45 then
-					self:moveUp()
+		cranked = function(change, acceleratedChange)
+			print(change)
+			if math.abs(change) > 0.005 then
+				local abs = playdate.getCrankPosition()
+				self.cursor:setAngle(abs)
+				self.cursor:show()
+				local function hideCursorCallback()
+					self.cursor:hide()
 				end
-				self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
+				local function afterCrankCallback(abs)
+					if abs >= 45 and abs < 135 then
+						self:moveRight()
+					elseif abs >= 135 and abs < 225 then
+						self:moveDown()
+					elseif abs >= 225 and abs < 315 then
+						self:moveLeft()
+					elseif abs >= 315 or abs < 45 then
+						self:moveUp()
+					end
+					self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
+				end
+				-- Growing circle animation
+				self.cursor:resetCircleAnimation()
+				-- Remove the timer to hide the cursor
+				if(self.hideCursorTimer ~= nil) then
+					self.hideCursorTimer:remove()
+				end
+				-- Remove the timer that executes the action
+				if(self.crankTimer ~= nil) then
+					self.crankTimer:remove()
+				end
+				self.crankTimer = playdate.timer.performAfterDelay(500, afterCrankCallback, abs)
 			end
-			-- Growing circle animation
-			self.cursor:resetCircleAnimation()
-			-- Remove the timer to hide the cursor
-			if(self.hideCursorTimer ~= nil) then
-				self.hideCursorTimer:remove()
-			end
-			-- Remove the timer that executes the action
-			if(self.crankTimer ~= nil) then
-				self.crankTimer:remove()
-			end
-			self.crankTimer = playdate.timer.performAfterDelay(500, afterCrankCallback, abs)
 		end,
 	}
 	playdate.inputHandlers.push(gameInputHandlers)
