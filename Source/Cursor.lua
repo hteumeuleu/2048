@@ -19,7 +19,6 @@ end
 
 function Cursor:addCircleAnimation()
 
-	print("addCircleAnimation")
 	self.circleAnimator = playdate.graphics.animator.new(500, 0, 100)
 
 end
@@ -46,7 +45,6 @@ function Cursor:update()
 		if not self.hideAnimator:ended() then
 			self:setScale(self.hideAnimator:currentValue())
 		else
-			print("remove")
 			self:remove()
 		end
 	end
