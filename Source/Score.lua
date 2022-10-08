@@ -73,7 +73,7 @@ function Score:checkMaxValue()
 
 end
 
--- initImage()
+-- drawImage()
 --
 function Score:drawImage()
 
