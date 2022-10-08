@@ -1,9 +1,8 @@
 class('Cursor').extends(playdate.graphics.sprite)
 
-local kCursorSize <const> = 24
+local kCursorSize <const> = 16
 local kCursorRadius <const> = kCursorSize / 2
 local kCursorBorderSize <const> = 2
-local kImaginaryCircleRadius <const> = 120 - kCursorRadius
 
 function Cursor:init()
 
@@ -17,13 +16,6 @@ function Cursor:init()
 	return self
 
 end
-
--- function Cursor:add()
-
--- 	Cursor.super:add(self)
--- 	self:setScale(1)
-
--- end
 
 function Cursor:addCircleAnimation()
 
@@ -95,7 +87,8 @@ end
 --
 function Cursor:initAnimator()
 
-	local polygon = playdate.geometry.polygon.new(400 - gGridSize + kCursorRadius, kCursorRadius + 4, 400 - kCursorRadius, kCursorRadius, 400 - kCursorRadius, 240 - kCursorRadius, 400 - gGridSize + kCursorRadius, 240 - kCursorRadius)
+	local offset = 2
+	local polygon = playdate.geometry.polygon.new(400 - gGridSize + kCursorRadius + offset, kCursorRadius + offset, 400 - kCursorRadius - offset, kCursorRadius + offset, 400 - kCursorRadius - offset, 240 - kCursorRadius - offset, 400 - gGridSize + kCursorRadius + offset, 240 - kCursorRadius - offset)
 	polygon:close()
 	self.animator = playdate.graphics.animator.new(360, {polygon}, playdate.easingFunctions.linear)
 	self.animator.repeatCount = -1
@@ -109,12 +102,8 @@ function Cursor:initImage()
 
 	local img = playdate.graphics.image.new(self.width, self.height)
 	playdate.graphics.pushContext(img)
-		local offset = 2
-		-- Shadow
-		-- playdate.graphics.setPattern({0x77, 0xFF, 0xDD, 0xFF, 0x77, 0xFF, 0xDD, 0xFF})
-		-- playdate.graphics.fillCircleInRect(0 + offset, 0 + (offset * 2), self.width - (offset * 2), self.height - (offset * 2), kCursorRadius)
+		local offset = 0
 		-- Inside
-		-- playdate.graphics.setPattern({0x77, 0xFF, 0xDD, 0xFF, 0x77, 0xFF, 0xDD, 0xFF})
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
 		playdate.graphics.fillCircleInRect(0, 0, self.width, self.height, kCursorRadius)
 		-- Outline
