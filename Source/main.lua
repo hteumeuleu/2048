@@ -11,6 +11,7 @@ import "Grid"
 import "Tile"
 import "Cursor"
 import "Score"
+import "Points"
 
 gFontFullCircle = playdate.graphics.font.new("fonts/font-full-circle")
 gGridSize = 240
