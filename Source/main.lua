@@ -33,3 +33,11 @@ function playdate.update()
 	game:update()
 
 end
+
+-- playdate.gameWillTerminate()
+--
+function playdate.gameWillTerminate()
+
+	game:save()
+
+end

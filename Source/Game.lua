@@ -87,16 +87,17 @@ end
 --
 function Game:setup()
 
-	self.over = false
-	self.won = false
-	self.keepPlaying = false
 	self.restartTimer = nil
 	self.restartTimerDuration = 1000
 	self.restartTimerAngle = 1
 	self.restartTimerCooldownAngle = 1
-	self.grid = Grid()
+	self.grid = Grid(self)
 	self:cancelRestartTimer()
-	self:addStartTiles()
+	if self:hasSave() then
+		self:addStartTilesFromSave()
+	else
+		self:addStartTiles()
+	end
 	self:setBackgroundDrawingCallback()
 
 end
@@ -107,6 +108,37 @@ function Game:addStartTiles()
 
 	for i=1, self.startTiles, 1 do
 		self.grid:addRandomTile()
+	end
+
+end
+
+-- addStartTilesFromSave()
+--
+function Game:addStartTilesFromSave()
+
+	local data = playdate.datastore.read("save")
+	local hasAddedTiles = false
+	local addedTiles = 0
+	if data ~= nil then
+		local tiles = split(data[1], ",")
+		for i=1, #tiles, 1 do
+			local value = tiles[i]
+			if value ~= "x" then
+				local col = math.ceil((i - 1) % 4 + 1)
+				local row = math.ceil(i / 4)
+				self.grid:addTile(col, row, value)
+				addedTiles += 1
+			end
+		end
+		local score = data[2]
+		if data[2] ~= nil then
+			self.grid.score:setValue(data[2])
+			self.grid.score:update()
+		end
+		playdate.datastore.delete("save")
+	end
+	if addedTiles < self.startTiles then
+		self:addStartTiles()
 	end
 
 end
@@ -166,6 +198,23 @@ function Game:drawVirtualScreen()
 
 end
 
+-- save()
+--
+function Game:save()
+
+	playdate.datastore.write({self.grid:serialize(), self.grid.score:getValue()}, "save")
+
+end
+
+-- hasSave()
+--
+function Game:hasSave()
+
+	local data = playdate.datastore.read("save")
+	return data ~= nil
+
+end
+
 -- initInputHandlers()
 --
 -- Add control handlers.
@@ -194,7 +243,6 @@ function Game:initInputHandlers()
 			self:moveDown()
 		end,
 		cranked = function(change, acceleratedChange)
-			print(change)
 			if math.abs(change) > 0.005 then
 				local abs = playdate.getCrankPosition()
 				self.cursor:setAngle(abs)

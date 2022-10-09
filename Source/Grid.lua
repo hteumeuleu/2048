@@ -2,9 +2,10 @@ class('Grid').extends()
 
 local kEmptyTile <const> = 0
 
-function Grid:init()
+function Grid:init(game)
 
 	Grid.super.init(self)
+	self.game = game
 	self.x = (400 - gGridSize)
 	self.y = (240 - gGridSize) / 2
 	self.width = gGridSize
@@ -463,6 +464,8 @@ function Grid:hasAvailableMatches()
 
 end
 
+-- shake()
+--
 function Grid:shake(vector)
 
 	local startPoint = playdate.geometry.point.new(vector.x * -1, vector.y * -1)
@@ -471,4 +474,24 @@ function Grid:shake(vector)
 	self.shakeAnimator.reverses = true
 	self.shakeAnimator.repeatCount = 2
 
+end
+
+-- serialize()
+--
+function Grid:serialize()
+	local p = ""
+	for j=1, 4, 1 do
+		for i=1, 4, 1 do
+			local t = self.tiles[self:getIndex(i, j)]
+			if t ~= kEmptyTile and t ~= nil then
+				p = p .. t.value
+			else
+				p = p .. "x"
+			end
+			if not (j == 4 and i == 4) then
+				p = p ..  ","
+			end
+		end
+	end
+	return p
 end
