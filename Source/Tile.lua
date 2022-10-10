@@ -46,7 +46,7 @@ function Tile:initImage()
 	function log2(n)
 		return math.floor(math.log10(n) / math.log10(2) + 0.5)
 	end
-	local kTileHeightOffset = math.min(10, log2(self.value))
+	local kTileHeightOffset = math.floor(map(log2(self.value) - 1, 0, 10, 0, 5))
 	local kTileBorderSize = 2
 	playdate.graphics.pushContext(img)
 		-- Background
