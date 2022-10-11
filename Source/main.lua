@@ -38,6 +38,8 @@ end
 --
 function playdate.gameWillTerminate()
 
-	game:save()
+	if game:hasAvailableMoves() then
+		game:save()
+	end
 
 end

@@ -20,6 +20,9 @@ function Game:update()
 	if self.restartTimer ~= nil or self.restartCooldownTimer ~= nil then
 		self:drawButton()
 	end
+	if not self:hasAvailableMoves() and not self.gameOverIsOnScreen then
+		self:drawGameOverScreen()
+	end
 
 end
 
@@ -87,6 +90,7 @@ end
 --
 function Game:setup()
 
+	self.gameOverIsOnScreen = false
 	self.restartTimer = nil
 	self.restartTimerDuration = 1000
 	self.restartTimerAngle = 1
@@ -160,6 +164,7 @@ function Game:drawButton()
 
 	if self.restartTimer ~= nil or self.restartCooldownTimer ~= nil then
 		playdate.graphics.setLineWidth(2)
+		playdate.graphics.setStrokeLocation(playdate.graphics.kStrokeCentered)
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
 		local circleY = 240 - (gGridBorderSize / 2) - defaultFontHeight
 		local circleRadius = 12
@@ -198,6 +203,44 @@ function Game:drawVirtualScreen()
 
 end
 
+-- drawGameOverScreen()
+--
+function Game:drawGameOverScreen()
+
+	local gameoverImage = playdate.graphics.image.new(gGridSize, gGridSize)
+	local gameover = playdate.graphics.sprite.new()
+	function gameover:draw()
+		local img = playdate.graphics.image.new(self.width, self.height)
+		playdate.graphics.pushContext(img)
+			playdate.graphics.setColor(playdate.graphics.kColorBlack)
+			playdate.graphics.fillRect(0, 0, self.width, self.height)
+		playdate.graphics.popContext()
+		img:drawFaded(0, 0, 0.8, playdate.graphics.image.kDitherTypeDiagonalLine)
+		-- Text
+		local w = (gTileSize * 2.5 + gGridBorderSize * 2)
+		local x = math.floor((gGridSize - w) / 2)
+		local y = math.floor((gGridSize - gTileSize) / 2)
+		playdate.graphics.setColor(playdate.graphics.kColorBlack)
+		playdate.graphics.fillRoundRect(x, y, w, gTileSize, gGridRadius + 2)
+		playdate.graphics.setColor(playdate.graphics.kColorWhite)
+		playdate.graphics.setLineWidth(2)
+		playdate.graphics.setStrokeLocation(playdate.graphics.kStrokeInside)
+		playdate.graphics.drawRoundRect(x + 4, y + 4, w - 8, gTileSize - 8, gGridRadius)
+		playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+		y = math.floor((gGridSize - gFontFullCircle:getHeight()) / 2)
+		playdate.graphics.setFont(gFontFullCircle)
+		playdate.graphics.drawTextInRect("GAME OVER", 0, y, gGridSize, gGridSize, nil, nil, kTextAlignment.center)
+		playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
+	end
+	gameover:setCenter(0, 0)
+	gameover:setSize(gGridSize, gGridSize)
+	gameover:moveTo(400 - gGridSize, 240 - gGridSize)
+	gameover:setZIndex(9999)
+	gameover:add()
+	self.gameOverIsOnScreen = true
+
+end
+
 -- save()
 --
 function Game:save()
@@ -231,19 +274,27 @@ function Game:initInputHandlers()
 			self:startRestartTimer()
 		end,
 		leftButtonDown = function()
-			self:moveLeft()
+			if self:hasAvailableMoves() then
+				self:moveLeft()
+			end
 		end,
 		rightButtonDown = function()
-			self:moveRight()
+			if self:hasAvailableMoves() then
+				self:moveRight()
+			end
 		end,
 		upButtonDown = function()
-			self:moveUp()
+			if self:hasAvailableMoves() then
+				self:moveUp()
+			end
 		end,
 		downButtonDown = function()
-			self:moveDown()
+			if self:hasAvailableMoves() then
+				self:moveDown()
+			end
 		end,
 		cranked = function(change, acceleratedChange)
-			if math.abs(change) > 0.005 then
+			if math.abs(change) > 0.005 and self:hasAvailableMoves() then
 				local abs = playdate.getCrankPosition()
 				self.cursor:setAngle(abs)
 				self.cursor:show()
