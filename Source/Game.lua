@@ -1,5 +1,8 @@
 class('Game').extends()
 
+-- Game
+--
+-- The main class running the game.
 function Game:init()
 
 	Game.super.init(self)
@@ -7,7 +10,6 @@ function Game:init()
 	self.cursor = Cursor()
 	self:initInputHandlers()
 	self:setup()
-
 	return self
 
 end
@@ -26,21 +28,30 @@ function Game:update()
 
 end
 
--- cancelRestartTimer()
+-- setup()
 --
-function Game:cancelRestartTimer()
+-- Init game variables and a new grid when a new game is started.
+function Game:setup()
 
-	if self.restartTimer ~= nil then
-		self.restartTimer:remove()
-		self.restartTimer = nil
-		local timerDuration = self.restartTimerDuration / 2
-		self.restartCooldownTimer = playdate.timer.new(timerDuration)
+	self.gameOverIsOnScreen = false
+	self.restartTimer = nil
+	self.restartTimerDuration = 1000
+	self.restartTimerAngle = 1
+	self.restartTimerCooldownAngle = 1
+	self.grid = Grid(self)
+	self:cancelRestartTimer()
+	if self:hasSave() then
+		self:addStartTilesFromSave()
+	else
+		self:addStartTiles()
 	end
+	self:setBackgroundDrawingCallback()
 
 end
 
 -- startRestartTimer()
 --
+-- Starts a timer before restarting a new game.
 function Game:startRestartTimer()
 
 
@@ -57,7 +68,18 @@ function Game:startRestartTimer()
 
 end
 
+-- cancelRestartTimer()
+--
+function Game:cancelRestartTimer()
 
+	if self.restartTimer ~= nil then
+		self.restartTimer:remove()
+		self.restartTimer = nil
+		local timerDuration = self.restartTimerDuration / 2
+		self.restartCooldownTimer = playdate.timer.new(timerDuration)
+	end
+
+end
 
 -- restart()
 --
@@ -72,37 +94,14 @@ end
 --
 function Game:setBackgroundDrawingCallback()
 
-	-- Background drawing callback.
-	-- Because we use a sprite, we need to have this callback.
 	playdate.graphics.sprite.setBackgroundDrawingCallback(
 		function(x, y, width, height)
 			playdate.graphics.setClipRect(x, y, width, height)
-				-- self:drawVirtualScreen()
 				self:drawButton()
 				self.grid:draw()
 			playdate.graphics.clearClipRect()
 		end
 	)
-
-end
-
--- setup()
---
-function Game:setup()
-
-	self.gameOverIsOnScreen = false
-	self.restartTimer = nil
-	self.restartTimerDuration = 1000
-	self.restartTimerAngle = 1
-	self.restartTimerCooldownAngle = 1
-	self.grid = Grid(self)
-	self:cancelRestartTimer()
-	if self:hasSave() then
-		self:addStartTilesFromSave()
-	else
-		self:addStartTiles()
-	end
-	self:setBackgroundDrawingCallback()
 
 end
 
@@ -157,6 +156,7 @@ end
 
 -- drawButton()
 --
+-- Draw the “New Game” button.
 function Game:drawButton()
 
 	local defaultFont = playdate.graphics.getSystemFont()
@@ -184,21 +184,6 @@ function Game:drawButton()
 		playdate.graphics.drawText("Ⓐ", 8, 240 - (gGridBorderSize / 2) - defaultFontHeight)
 		playdate.graphics.setFont(gFontFullCircle)
 		playdate.graphics.drawText(string.upper("New Game"), 32, 240 - (gGridBorderSize / 2) - defaultFont:getHeight() + 2)
-	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
-
-end
-
--- drawVirtualScreen()
---
-function Game:drawVirtualScreen()
-
-	playdate.graphics.setPattern({0x0, 0x0, 0x8, 0x10, 0x20, 0x40, 0x80, 0x0})
-	playdate.graphics.fillRoundRect(gGridBorderSize, gGridBorderSize + 50 + gGridBorderSize, 144, 144, 4)
-
-	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
-		local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
-		playdate.graphics.setFont(font)
-		playdate.graphics.drawTextInRect("*2048*", 8, 8 + 50 + 8 + (144 - font:getHeight()) / 2, 144, font:getHeight(), nil, nil, kTextAlignment.center)
 	playdate.graphics.setImageDrawMode(playdate.graphics.kDrawModeCopy)
 
 end

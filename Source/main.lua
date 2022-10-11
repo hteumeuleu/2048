@@ -12,6 +12,7 @@ import "Tile"
 import "Cursor"
 import "Score"
 
+-- Global variables
 gFontFullCircle = playdate.graphics.font.new("fonts/font-full-circle")
 gGridSize = 240
 gGridRadius = 4
@@ -20,8 +21,11 @@ gTileSize = 50
 gTileRadius = 2
 gMove = gGridBorderSize + gTileSize
 
+-- Global settings
 playdate.graphics.setBackgroundColor(playdate.graphics.kColorBlack)
+playdate.setCrankSoundsDisabled(true)
 
+-- Start game
 local game = Game()
 
 -- playdate.update()

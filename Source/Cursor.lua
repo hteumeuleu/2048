@@ -4,6 +4,9 @@ local kCursorSize <const> = 16
 local kCursorRadius <const> = kCursorSize / 2
 local kCursorBorderSize <const> = 2
 
+-- Cursor
+--
+-- Sprite shown while using the crank.
 function Cursor:init()
 
 	Cursor.super.init(self)
@@ -17,22 +20,8 @@ function Cursor:init()
 
 end
 
-function Cursor:addCircleAnimation()
-
-	self.circleAnimator = playdate.graphics.animator.new(500, 0, 100)
-
-end
-
-function Cursor:resetCircleAnimation()
-
-	if self.circleAnimator ~= nil then
-		self.circleAnimator:reset()
-	else
-		self:addCircleAnimation()
-	end
-
-end
-
+-- update()
+--
 function Cursor:update()
 
 	Cursor.super:update(self)
@@ -50,6 +39,26 @@ function Cursor:update()
 	end
 end
 
+-- addCircleAnimation()
+--
+function Cursor:addCircleAnimation()
+
+	self.circleAnimator = playdate.graphics.animator.new(500, 0, 100)
+
+end
+
+-- resetCircleAnimation()
+--
+function Cursor:resetCircleAnimation()
+
+	if self.circleAnimator ~= nil then
+		self.circleAnimator:reset()
+	else
+		self:addCircleAnimation()
+	end
+
+end
+
 -- setAngle(angle)
 --
 function Cursor:setAngle(angle)
@@ -59,7 +68,7 @@ function Cursor:setAngle(angle)
 
 end
 
--- show
+-- show()
 --
 function Cursor:show()
 
@@ -69,7 +78,7 @@ function Cursor:show()
 
 end
 
--- hide
+-- hide()
 --
 function Cursor:hide()
 
@@ -81,8 +90,9 @@ function Cursor:hide()
 
 end
 
--- initAnimator
+-- initAnimator()
 --
+-- Creates a polygon used within an animator to represent the path of the Cursor around the grid.
 function Cursor:initAnimator()
 
 	local offset = 2

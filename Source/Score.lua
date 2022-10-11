@@ -2,6 +2,9 @@ class('Score').extends(playdate.graphics.sprite)
 
 scoreObjectIndex = 1
 
+-- Score
+--
+-- A score sprite containing a line of text and a score value.
 function Score:init(text)
 
 	Score.super.init(self)
@@ -20,6 +23,20 @@ function Score:init(text)
 
 end
 
+-- update()
+--
+function Score:update()
+
+	if self.value ~= self.previousValue then
+		self:drawImage()
+		self.previousValue = self.value
+	end
+
+end
+
+-- load()
+--
+-- Loads score from data save.
 function Score:load()
 
 	local data = playdate.datastore.read(self.text)
@@ -30,18 +47,24 @@ function Score:load()
 
 end
 
+-- save()
+--
 function Score:save()
 
 	playdate.datastore.write({self.value, "I didn't bother to make this any obfuscated, but that's not a reason for you to cheat here. Enjoy the game at your own pace."}, self.text)
 
 end
 
+-- getValue()
+--
 function Score:getValue()
 
 	return self.value
 
 end
 
+-- setValue()
+--
 function Score:setValue(value)
 
 	self.value = value
@@ -49,6 +72,8 @@ function Score:setValue(value)
 
 end
 
+-- addToValue()
+--
 function Score:addToValue(value)
 
 	self.value = self.value + value
@@ -56,15 +81,9 @@ function Score:addToValue(value)
 
 end
 
-function Score:update()
-
-	if self.value ~= self.previousValue then
-		self:drawImage()
-		self.previousValue = self.value
-	end
-
-end
-
+-- checkMaxValue()
+--
+-- To prevent text overflow bugs, we cap the maximum value of any score.
 function Score:checkMaxValue()
 
 	if self.value > 999999 then

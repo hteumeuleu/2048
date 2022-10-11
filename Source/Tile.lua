@@ -3,6 +3,9 @@ class('Tile').extends(playdate.graphics.sprite)
 local kTileCollisionGroup = 1
 local kTileSecretId = 1
 
+-- Tile
+--
+-- A single game’s tile within the Grid.
 function Tile:init(value)
 
 	Tile.super.init(self)
@@ -22,10 +25,14 @@ function Tile:init(value)
 
 end
 
+-- __tostring()
+--
 function Tile:__tostring()
 	return "Tile[" .. self.value .. "]"
 end
 
+-- update()
+--
 function Tile:update()
 
 	if self.scaleAnimator ~= nil then

@@ -2,6 +2,9 @@ class('Grid').extends()
 
 local kEmptyTile <const> = 0
 
+-- Grid
+--
+-- The game’s grid, containing the tiles.
 function Grid:init(game)
 
 	Grid.super.init(self)
@@ -12,7 +15,7 @@ function Grid:init(game)
 	self.height = gGridSize
 	self.image = self:createBackgroundImage()
 	scoreObjectIndex = 1
-	self.score = Score("Score")
+	self.score = Score("Score") -- Should move scores to the game class instead.
 	self.bestScore = Score("Best")
 	self.bestScore:load()
 	self:draw()
@@ -21,6 +24,9 @@ function Grid:init(game)
 
 end
 
+-- __tostring()
+--
+-- Outputs an ASCII art grid to the terminal.
 function Grid:__tostring()
 	local p = ""
 
@@ -112,7 +118,7 @@ end
 
 -- draw()
 --
--- Draws the Grid background.
+-- Draws the Grid’s background.
 function Grid:draw()
 
 	self.image:draw(self.x, self.y)
@@ -131,8 +137,10 @@ function Grid:initTiles()
 	}
 end
 
--- moveTile()
+-- moveTileInArray()
 --
+-- Moves a tile’s representation within the `self.tiles` array.
+-- This does not move a tile on screen. Just in data.
 function Grid:moveTileInArray(fromIndex, toIndex)
 
 	if fromIndex ~= toIndex and fromIndex >= 1 and fromIndex <= #self.tiles and toIndex >= 1 and toIndex <= #self.tiles then
@@ -143,6 +151,8 @@ function Grid:moveTileInArray(fromIndex, toIndex)
 end
 
 -- setZIndex()
+--
+-- Update the tile at `i` ZIndex.
 function Grid:setZIndex(i)
 
 	if self.tiles[i] ~= nil and self.tiles[i] ~= kEmptyTile then
@@ -155,6 +165,7 @@ end
 -- addTile(col, row, value)
 --
 -- Creates a tile with `value` displayed at column `col` and row `row` inside the Grid.
+-- `random` is a boolean used to play a slightly different animation between a new tile (generated at each round — `true`) and a new tile (from a merge — `false`).
 function Grid:addTile(col, row, value, random)
 
 	if self:hasAvailableCells() then
@@ -196,15 +207,16 @@ function Grid:addRandomTile()
 		else
 			value = 4
 		end
-		local col, row = self:getCoords(self:randomAvailableCell())
+		local col, row = self:getCoords(self:getRandomAvailableCell())
 		self:addTile(col, row, value, true)
 	end
 
 end
 
--- randomAvailableCell()
+-- getRandomAvailableCell()
 --
-function Grid:randomAvailableCell()
+-- Return the index of a random available cell within `self.tile`.
+function Grid:getRandomAvailableCell()
 
 	local cells = self:getAvailableCells()
 	if cells ~= nil and #cells > 0 then
@@ -216,6 +228,7 @@ end
 
 -- getAvailableCells()
 --
+-- Returns an array of indexes of available cells within `self.tiles`.
 function Grid:getAvailableCells()
 
 	local cells = {}
@@ -263,6 +276,8 @@ function Grid:getY(row)
 
 end
 
+-- findFarthestPosition()
+--
 function Grid:findFarthestPosition(i, vector)
 
 	local col, row = self:getCoords(i)
@@ -325,6 +340,8 @@ function Grid:move(direction)
 
 end
 
+-- prepareTiles()
+--
 function Grid:prepareTiles()
 
 	for _, tile in ipairs(self.tiles) do
@@ -370,7 +387,7 @@ function Grid:getCoords(index)
 
 end
 
--- createImage()
+-- createBackgroundImage()
 --
 -- Creates the background image of the grid.
 function Grid:createBackgroundImage()
@@ -394,7 +411,9 @@ function Grid:createBackgroundImage()
 
 end
 
-
+-- getVector()
+--
+-- Returns a `vector2D` representing the direction of the movement.
 function Grid:getVector(direction)
 
 	local map <const> = {
@@ -408,6 +427,8 @@ function Grid:getVector(direction)
 
 end
 
+-- buildTraversals()
+--
 function Grid:buildTraversals(vector)
 
 	local traversals = {}
