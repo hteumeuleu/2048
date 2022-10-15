@@ -14,10 +14,6 @@ function Grid:init(game)
 	self.width = gGridSize
 	self.height = gGridSize
 	self.image = self:createBackgroundImage()
-	scoreObjectIndex = 1
-	self.score = Score("Score") -- Should move scores to the game class instead.
-	self.bestScore = Score("Best")
-	self.bestScore:load()
 	self:draw()
 	self:initTiles()
 	return self
@@ -89,12 +85,11 @@ function Grid:update()
 								tile:remove()
 								self.tiles[i] = kEmptyTile
 								self:addTile(newCol, newRow, newValue)
-								self.score:addToValue(newValue)
-								self.score:update()
-								if self.score:getValue() > self.bestScore:getValue() then
-									self.bestScore:setValue(self.score:getValue())
-									self.bestScore:update()
-									self.bestScore:save()
+								self.game.score:addToValue(newValue)
+								self.game.score:update()
+								if self.game.score:getValue() > self.game.bestScore:getValue() then
+									self.game.bestScore:setValue(self.game.score:getValue())
+									self.game.bestScore:update()
 								end
 							elseif not tile.isNew then
 								local newCol, newRow = self:getCoordsFromPosition(tile.animatorEndPoint.x, tile.animatorEndPoint.y)

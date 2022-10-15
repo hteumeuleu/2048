@@ -38,6 +38,9 @@ function Game:setup()
 	self.restartTimerDuration = 1000
 	self.restartTimerAngle = 1
 	self.restartTimerCooldownAngle = 1
+	self.score = Score("Score", 1)
+	self.bestScore = Score("Best", 2)
+	self.bestScore:load()
 	self.grid = Grid(self)
 	self:cancelRestartTimer()
 	if self:hasSave() then
@@ -135,8 +138,8 @@ function Game:addStartTilesFromSave()
 		end
 		local score = data[2]
 		if data[2] ~= nil then
-			self.grid.score:setValue(data[2])
-			self.grid.score:update()
+			self.score:setValue(data[2])
+			self.score:update()
 		end
 		playdate.datastore.delete("save")
 	end
@@ -230,7 +233,7 @@ end
 --
 function Game:save()
 
-	playdate.datastore.write({self.grid:serialize(), self.grid.score:getValue()}, "save")
+	playdate.datastore.write({self.grid:serialize(), self.score:getValue()}, "save")
 
 end
 

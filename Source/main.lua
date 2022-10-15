@@ -42,6 +42,9 @@ end
 --
 function playdate.gameWillTerminate()
 
+	if game.score:getValue() >= game.bestScore:getValue() then
+		game.bestScore:save()
+	end
 	if game:hasAvailableMoves() then
 		game:save()
 	end

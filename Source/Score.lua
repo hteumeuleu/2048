@@ -1,11 +1,9 @@
 class('Score').extends(playdate.graphics.sprite)
 
-scoreObjectIndex = 1
-
 -- Score
 --
 -- A score sprite containing a line of text and a score value.
-function Score:init(text)
+function Score:init(text, index)
 
 	Score.super.init(self)
 	self.previousValue = 0
@@ -13,8 +11,7 @@ function Score:init(text)
 	self.width = (160 - (3 * 8)) / 2
 	self.height = 50
 	self.text = string.lower(text)
-	self.index = scoreObjectIndex
-	scoreObjectIndex = scoreObjectIndex + 1
+	self.index = index
 	self:drawImage()
 	self:setCollisionsEnabled(false)
 	self:moveTo(8 + (8 + self.width) * (self.index - 1) + (self.width / 2), 8 + (self.height / 2))
