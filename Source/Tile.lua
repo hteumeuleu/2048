@@ -21,6 +21,7 @@ function Tile:init(value)
 	self:add()
 	self.secretId = kTileSecretId
 	kTileSecretId = kTileSecretId + 1
+	self.animators = {}
 	return self
 
 end
@@ -35,11 +36,7 @@ end
 --
 function Tile:update()
 
-	if self.scaleAnimator ~= nil then
-		if not self.scaleAnimator:ended() then
-			self:setScale(self.scaleAnimator:currentValue())
-		end
-	end
+	self:updateAnimators()
 
 end
 
@@ -103,6 +100,7 @@ function Tile:slideTo(x, y)
 	end
 	self.animatorEndPoint = playdate.geometry.point.new(actualX, actualY)
 	self.animator = playdate.graphics.animator.new(100, self.animatorStartPoint, self.animatorEndPoint)
+	self:setAnimator(self.animator, false, false)
 	return actualX, actualY
 
 end
@@ -123,5 +121,103 @@ function Tile:collisionResponse(other)
 	else
 		return playdate.graphics.sprite.kCollisionTypeFreeze
 	end
+
+end
+
+-- addAnimator()
+--
+function Tile:addAnimator(animator, type, callback)
+
+	if animator ~= nil and not animator:ended() then
+		-- Check if animator is not applied yet
+		for key, value in ipairs(self.animators) do
+			if value.animator == animator then
+				return animator
+			end
+		end
+		-- Create data object
+		local animatorData = {}
+		animatorData.animator = animator
+		animatorData.type = type
+		animatorData.callback = callback
+		table.insert(self.animators, animatorData)
+		-- Apply animator directly if it's for moving the tile
+		if type == nil or type == "move" then
+			self:setAnimator(animator, false, false)
+		end
+	end
+
+end
+
+-- ogRemoveAnimator()
+--
+-- Backup of the original playdate.graphics.sprite:removeAnimator()
+function Tile:ogRemoveAnimator()
+	Tile.super.removeAnimator(self)
+end
+
+-- removeAnimator(animator)
+--
+function Tile:removeAnimator(animator)
+
+	if animator == nil then
+		self:ogRemoveAnimator()
+	else
+		for key, value in ipairs(self.animators) do
+			if value.animator == animator then
+				if value.type == nil or value.type == "move" then
+					self:removeAnimator()
+				end
+				table.remove(self.animators, key)
+			end
+		end
+	end
+
+end
+
+-- updateAnimators()
+--
+function Tile:updateAnimators()
+
+	for key, value in ipairs(self.animators) do
+		-- Callback function if animation has ended
+		if value.animator:ended() then
+			if value.callback ~= nil and type(value.callback) == "function" then
+				value.callback(self)
+			end
+			-- Reset to initial value after animation
+			if value.type == "scale" then
+				local initialValue = 1
+				if value.animator.reverses == true then
+					initialValue = value.animator:valueAtTime(0)
+				else
+					initialValue = value.animator:valueAtTime(value.animator.duration)
+				end
+				self:setScale(initialValue)
+			end
+			self:removeAnimator(value.animator)
+		end
+		-- Animation update
+		if not value.animator:ended() then
+			-- Scale
+			if value.type == "scale" then
+				self:setScale(value.animator:currentValue())
+			end
+		end
+	end
+
+end
+
+-- isAnimating()
+--
+function Tile:isAnimating()
+
+	local isAnimating = false
+	for key, value in ipairs(self.animators) do
+		if not value.animator:ended() then
+			isAnimating = true
+		end
+	end
+	return isAnimating
 
 end

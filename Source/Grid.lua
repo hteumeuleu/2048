@@ -65,10 +65,8 @@ function Grid:update()
 					if tile.moved or tile.mustBeMerged then
 						hasMoved = true
 					end
-					if tile.scaleAnimator ~= nil then
-						if not tile.scaleAnimator:ended() then
-							isStillAnimating = true
-						end
+					if tile:isAnimating() then
+						isStillAnimating = true
 					end
 					if tile.animator ~= nil then
 						if not tile.animator:ended() then
@@ -178,13 +176,15 @@ function Grid:addTile(col, row, value, random)
 		end
 		-- We set the new tile at this index
 		self.tiles[i] = t
-		-- We create an animator for this new tile
+		-- We add a scale animator for this new tile
 		if random == true then
-			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.linear, 100)
-			self.tiles[i].scaleAnimator.reverses = false
+			local scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.linear, 100)
+			scaleAnimator.reverses = false
+			self.tiles[i]:addAnimator(scaleAnimator, "scale")
 		else
-			self.tiles[i].scaleAnimator = playdate.graphics.animator.new(100, 1, 1.1034, playdate.easingFunctions.linear)
-			self.tiles[i].scaleAnimator.reverses = true
+			local scaleAnimator = playdate.graphics.animator.new(100, 1, 1.08, playdate.easingFunctions.linear)
+			scaleAnimator.reverses = true
+			self.tiles[i]:addAnimator(scaleAnimator, "scale")
 		end
 	end
 
@@ -315,9 +315,6 @@ function Grid:move(direction)
 					local farthestCol, farthestRow = self:findFarthestPosition(i, vector)
 					local targetX, targetY = self:getDrawingPositionAt(farthestCol, farthestRow)
 					tile:slideTo(targetX, targetY)
-					if tile.animator ~= nil then
-						tile:setAnimator(tile.animator, false, false)
-					end
 					if tile.moved or tile.mustBeMerged then
 						hasMoved = true
 					end
@@ -344,7 +341,7 @@ function Grid:prepareTiles()
 			tile:setScale(1)
 			tile.moved = false
 			tile.isNew = false
-			tile.scaleAnimator = nil
+			tile.animators = {}
 			tile.animator = nil
 			tile.mustBeRemoved = nil
 			tile.mustBeMerged = nil
