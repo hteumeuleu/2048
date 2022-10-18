@@ -36,7 +36,7 @@ end
 --
 function Tile:update()
 
-	self:updateAnimators()
+	self:updateCustomAnimators()
 
 end
 
@@ -124,9 +124,9 @@ function Tile:collisionResponse(other)
 
 end
 
--- addAnimator()
+-- addCustomAnimator()
 --
-function Tile:addAnimator(animator, type, callback)
+function Tile:addCustomAnimator(animator, type, callback)
 
 	if animator ~= nil and not animator:ended() then
 		-- Check if animator is not applied yet
@@ -149,25 +149,15 @@ function Tile:addAnimator(animator, type, callback)
 
 end
 
--- ogRemoveAnimator()
+-- removeCustomAnimator(animator)
 --
--- Backup of the original playdate.graphics.sprite:removeAnimator()
-function Tile:ogRemoveAnimator()
-	Tile.super.removeAnimator(self)
-end
+function Tile:removeCustomAnimator(animator)
 
--- removeAnimator(animator)
---
-function Tile:removeAnimator(animator)
-
-	if animator == nil then
-		self:ogRemoveAnimator()
-	else
+	if animator ~= nil then
 		for key, value in ipairs(self.animators) do
-			if value.animator == animator then
-				if value.type == nil or value.type == "move" then
-					self:removeAnimator()
-				end
+			if value.type == nil or value.type == "move" then
+				self:removeAnimator()
+			elseif value.animator == animator then
 				table.remove(self.animators, key)
 			end
 		end
@@ -175,9 +165,9 @@ function Tile:removeAnimator(animator)
 
 end
 
--- updateAnimators()
+-- updateCustomAnimators()
 --
-function Tile:updateAnimators()
+function Tile:updateCustomAnimators()
 
 	for key, value in ipairs(self.animators) do
 		-- Callback function if animation has ended
@@ -195,7 +185,7 @@ function Tile:updateAnimators()
 				end
 				self:setScale(initialValue)
 			end
-			self:removeAnimator(value.animator)
+			self:removeCustomAnimator(value.animator)
 		end
 		-- Animation update
 		if not value.animator:ended() then

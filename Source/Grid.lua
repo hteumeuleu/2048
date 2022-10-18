@@ -180,11 +180,11 @@ function Grid:addTile(col, row, value, random)
 		if random == true then
 			local scaleAnimator = playdate.graphics.animator.new(100, 0.8, 1, playdate.easingFunctions.linear, 100)
 			scaleAnimator.reverses = false
-			self.tiles[i]:addAnimator(scaleAnimator, "scale")
+			self.tiles[i]:addCustomAnimator(scaleAnimator, "scale")
 		else
 			local scaleAnimator = playdate.graphics.animator.new(100, 1, 1.08, playdate.easingFunctions.linear)
 			scaleAnimator.reverses = true
-			self.tiles[i]:addAnimator(scaleAnimator, "scale")
+			self.tiles[i]:addCustomAnimator(scaleAnimator, "scale")
 		end
 	end
 
