@@ -29,7 +29,7 @@ end
 -- __tostring()
 --
 function Tile:__tostring()
-	return "Tile[" .. self.value .. "]"
+	return self.secretId .. "[" .. self.value .. "]"
 end
 
 -- update()
@@ -81,8 +81,6 @@ function Tile:slideTo(x, y)
 
 	local previousX = self.x
 	local previousY = self.y
-	self.animator = nil
-	self.animatorStartPoint = playdate.geometry.point.new(previousX, previousY)
 	local actualX, actualY, collisions, length = self:moveWithCollisions(x, y)
 	if actualX ~= previousX or actualY ~= previousY then
 		self.moved = true
@@ -90,14 +88,16 @@ function Tile:slideTo(x, y)
 	if length > 0 then
 		for _, collision in ipairs(collisions) do
 			local overlap = (collision.type == playdate.graphics.sprite.kCollisionTypeOverlap)
-			local sprite = collision.sprite
-			local other = collision.other
 			if overlap then
+				local sprite = collision.sprite
+				local other = collision.other
 				sprite.mustBeRemoved = true
 				other.mustBeMerged = true
 			end
 		end
 	end
+	self.animator = nil
+	self.animatorStartPoint = playdate.geometry.point.new(previousX, previousY)
 	self.animatorEndPoint = playdate.geometry.point.new(actualX, actualY)
 	self.animator = playdate.graphics.animator.new(100, self.animatorStartPoint, self.animatorEndPoint)
 	self:setAnimator(self.animator, false, false)
@@ -112,14 +112,10 @@ end
 -- Otherwise we want the Tile to be blocked (freeze).
 function Tile:collisionResponse(other)
 
-
-	if other.mustBeRemoved or other.mustBeMerged then
+	if other.mustBeRemoved or other.mustBeMerged or other:getTag() ~= self:getTag() then
 		return playdate.graphics.sprite.kCollisionTypeFreeze
-	end
-	if other:getTag() == self:getTag() then
-		return playdate.graphics.sprite.kCollisionTypeOverlap
 	else
-		return playdate.graphics.sprite.kCollisionTypeFreeze
+		return playdate.graphics.sprite.kCollisionTypeOverlap
 	end
 
 end
@@ -153,13 +149,12 @@ end
 --
 function Tile:removeCustomAnimator(animator)
 
-	if animator ~= nil then
-		for key, value in ipairs(self.animators) do
-			if value.type == nil or value.type == "move" then
-				self:removeAnimator()
-			elseif value.animator == animator then
-				table.remove(self.animators, key)
-			end
+	for key, value in ipairs(self.animators) do
+		if value.type == nil or value.type == "move" then
+			self:removeAnimator()
+			table.remove(self.animators, key)
+		elseif value.animator == animator then
+			table.remove(self.animators, key)
 		end
 	end
 
@@ -170,8 +165,8 @@ end
 function Tile:updateCustomAnimators()
 
 	for key, value in ipairs(self.animators) do
-		-- Callback function if animation has ended
 		if value.animator:ended() then
+			-- Callback function if animation has ended
 			if value.callback ~= nil and type(value.callback) == "function" then
 				value.callback(self)
 			end
