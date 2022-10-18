@@ -55,16 +55,12 @@ function Grid:update()
 	end
 	if self.isAnimating then
 		local isStillAnimating = false
-		local hasMoved = false
 
 		for _, col in ipairs(self.traversals.x) do
 			for _, row in ipairs(self.traversals.y) do
 				local i = self:getIndex(col, row)
 				local tile = self.tiles[i]
 				if tile ~= nil and tile ~= kEmptyTile then
-					if tile.moved or tile.mustBeMerged then
-						hasMoved = true
-					end
 					if tile:isAnimating() then
 						isStillAnimating = true
 					end
@@ -101,7 +97,7 @@ function Grid:update()
 		if not isStillAnimating then
 			self.traversals = nil
 			self.isAnimating = false
-			if hasMoved then
+			if self.hasMoved then
 				self:addRandomTile()
 			end
 		end
@@ -304,7 +300,7 @@ function Grid:move(direction)
 		self:prepareTiles()
 		local vector <const> = self:getVector(direction)
 		self.traversals = self:buildTraversals(vector)
-		local hasMoved = false
+		self.hasMoved = false
 
 		for _, col in ipairs(self.traversals.x) do
 			for _, row in ipairs(self.traversals.y) do
@@ -316,13 +312,13 @@ function Grid:move(direction)
 					local targetX, targetY = self:getDrawingPositionAt(farthestCol, farthestRow)
 					tile:slideTo(targetX, targetY)
 					if tile.moved or tile.mustBeMerged then
-						hasMoved = true
+						self.hasMoved = true
 					end
 				end
 			end
 		end
 
-		if hasMoved then
+		if self.hasMoved then
 			self.isAnimating = true
 		else
 			self:shake(vector)
