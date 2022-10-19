@@ -195,6 +195,7 @@ end
 --
 function Game:drawGameOverScreen()
 
+	self.gameOverIsOnScreen = true
 	local gameoverImage = playdate.graphics.image.new(gGridSize, gGridSize)
 	local gameover = playdate.graphics.sprite.new()
 	function gameover:draw()
@@ -224,8 +225,9 @@ function Game:drawGameOverScreen()
 	gameover:setSize(gGridSize, gGridSize)
 	gameover:moveTo(400 - gGridSize, 240 - gGridSize)
 	gameover:setZIndex(9999)
-	gameover:add()
-	self.gameOverIsOnScreen = true
+	playdate.timer.performAfterDelay(500, function()
+		gameover:add()
+	end)
 
 end
 
