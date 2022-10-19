@@ -477,8 +477,8 @@ end
 --
 function Grid:shake(vector)
 
-	local startPoint = playdate.geometry.point.new(vector.x * -1, vector.y * -1)
-	local endPoint = playdate.geometry.point.new(vector.x * 1, vector.y * 1)
+	local startPoint = playdate.geometry.point.new(vector.x * 1, vector.y * 1)
+	local endPoint = playdate.geometry.point.new(vector.x * -1, vector.y * -1)
 	self.shakeAnimator = playdate.graphics.animator.new(100, startPoint, endPoint, playdate.easingFunctions.inBounce, 100)
 	self.shakeAnimator.reverses = true
 	self.shakeAnimator.repeatCount = 2
