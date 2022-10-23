@@ -292,19 +292,17 @@ function Game:initInputHandlers()
 					self.cursor:hide()
 				end
 				local function afterCrankCallback(abs)
-					if abs >= 45 and abs < 135 then
+					if abs >= 55 and abs < 125 then
 						self:moveRight()
-					elseif abs >= 135 and abs < 225 then
+					elseif abs >= 145 and abs < 215 then
 						self:moveDown()
-					elseif abs >= 225 and abs < 315 then
+					elseif abs >= 225 and abs < 305 then
 						self:moveLeft()
-					elseif abs >= 315 or abs < 45 then
+					elseif abs >= 315 or abs < 35 then
 						self:moveUp()
 					end
 					self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
 				end
-				-- Growing circle animation
-				self.cursor:resetCircleAnimation()
 				-- Remove the timer to hide the cursor
 				if(self.hideCursorTimer ~= nil) then
 					self.hideCursorTimer:remove()
@@ -313,7 +311,7 @@ function Game:initInputHandlers()
 				if(self.crankTimer ~= nil) then
 					self.crankTimer:remove()
 				end
-				self.crankTimer = playdate.timer.performAfterDelay(500, afterCrankCallback, abs)
+				self.crankTimer = playdate.timer.performAfterDelay(200, afterCrankCallback, abs)
 			end
 		end,
 	}

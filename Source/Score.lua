@@ -12,6 +12,7 @@ function Score:init(text, index)
 	self.height = 50
 	self.text = string.lower(text)
 	self.index = index
+	self:setZIndex(11)
 	self:drawImage()
 	self:setCollisionsEnabled(false)
 	self:moveTo(8 + (8 + self.width) * (self.index - 1) + (self.width / 2), 8 + (self.height / 2))

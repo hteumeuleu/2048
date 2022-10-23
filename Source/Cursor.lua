@@ -1,8 +1,9 @@
 class('Cursor').extends(playdate.graphics.sprite)
 
-local kCursorSize <const> = 16
+local kCursorSize <const> = 48
 local kCursorRadius <const> = kCursorSize / 2
 local kCursorBorderSize <const> = 2
+local kCursorOffset <const> = 2
 
 -- Cursor
 --
@@ -10,12 +11,14 @@ local kCursorBorderSize <const> = 2
 function Cursor:init()
 
 	Cursor.super.init(self)
-	self.width = kCursorSize
-	self.height = kCursorSize
+	self.width = gGridSize
+	self.height = gGridSize
+	self.point = playdate.geometry.point.new(0, 0)
 	self:setZIndex(10)
-	self:initImage()
+	self:drawImage()
 	self:initAnimator()
 	self:setCollisionsEnabled(false)
+	self:moveTo(400 - (gGridSize / 2), 240 - (gGridSize / 2))
 	return self
 
 end
@@ -25,46 +28,26 @@ end
 function Cursor:update()
 
 	Cursor.super:update(self)
-
-	if self.circleAnimator ~= nil and not self.circleAnimator:ended() then
-		self:initImage()
-	end
+	-- if self.hideAnimator ~= nil and self.hideAnimator:ended() then
+	-- 	self:remove()
+	-- end
 
 	if self.hideAnimator ~= nil then
 		if not self.hideAnimator:ended() then
-			self:setScale(self.hideAnimator:currentValue())
+			self:drawImage()
+			-- self:setScale(self.hideAnimator:currentValue())
 		else
 			self:remove()
 		end
 	end
 end
 
--- addCircleAnimation()
---
-function Cursor:addCircleAnimation()
-
-	self.circleAnimator = playdate.graphics.animator.new(500, 0, 100)
-
-end
-
--- resetCircleAnimation()
---
-function Cursor:resetCircleAnimation()
-
-	if self.circleAnimator ~= nil then
-		self.circleAnimator:reset()
-	else
-		self:addCircleAnimation()
-	end
-
-end
-
 -- setAngle(angle)
 --
 function Cursor:setAngle(angle)
 
-	local p = self.animator:valueAtTime(angle + 45)
-	self:moveTo(p)
+	self.point = self.animator:valueAtTime(angle + 45)
+	self:drawImage()
 
 end
 
@@ -73,7 +56,6 @@ end
 function Cursor:show()
 
 	self.hideAnimator = nil
-	self:setScale(1)
 	self:add()
 
 end
@@ -95,38 +77,41 @@ end
 -- Creates a polygon used within an animator to represent the path of the Cursor around the grid.
 function Cursor:initAnimator()
 
-	local offset = 2
-	local polygon = playdate.geometry.polygon.new(400 - gGridSize + kCursorRadius + offset, kCursorRadius + offset, 400 - kCursorRadius - offset, kCursorRadius + offset, 400 - kCursorRadius - offset, 240 - kCursorRadius - offset, 400 - gGridSize + kCursorRadius + offset, 240 - kCursorRadius - offset)
+	local polygon = playdate.geometry.polygon.new(kCursorOffset, kCursorOffset, gGridSize - kCursorOffset, kCursorOffset, gGridSize - kCursorOffset, gGridSize - kCursorOffset, kCursorOffset, gGridSize - kCursorOffset)
 	polygon:close()
 	self.animator = playdate.graphics.animator.new(360, {polygon}, playdate.easingFunctions.linear)
 	self.animator.repeatCount = -1
 
 end
 
--- initImage()
+-- drawImage()
 --
--- Creates the image to be drawn with the cursor.
-function Cursor:initImage()
+-- Draws the image of the cursor.
+function Cursor:drawImage()
 
-	local img = playdate.graphics.image.new(self.width, self.height)
-	playdate.graphics.pushContext(img)
-		local offset = 0
-		-- Inside
+	local mask = playdate.graphics.image.new(gGridSize, gGridSize, playdate.graphics.kColorBlack)
+	playdate.graphics.pushContext(mask)
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
-		playdate.graphics.fillCircleInRect(0, 0, self.width, self.height, kCursorRadius)
-		-- Outline
-		playdate.graphics.setColor(playdate.graphics.kColorBlack)
-		playdate.graphics.setStrokeLocation(playdate.graphics.kStrokeInside)
-		playdate.graphics.setLineWidth(kCursorBorderSize)
-		playdate.graphics.drawCircleInRect(0 + offset, 0, self.width - (offset * 2), self.height - (offset * 2), kCursorRadius)
-		-- Inner Circle
-		if self.circleAnimator ~= nil and not self.circleAnimator:ended() then
-			local innerCircleRadius = kCursorRadius - (offset * 2)
-			local r = self.circleAnimator:currentValue() * innerCircleRadius / 100
-			playdate.graphics.setColor(playdate.graphics.kColorBlack)
-			playdate.graphics.fillCircleAtPoint(self.width / 2, self.height / 2 - offset, r)
+		local dynamicRadius = kCursorRadius
+		if self.hideAnimator ~= nil then
+			if not self.hideAnimator:ended() then
+				dynamicRadius = map(self.hideAnimator:currentValue(), 1, 0, kCursorRadius, 1)
+			else
+				dynamicRadius = 0
+			end
 		end
+		playdate.graphics.fillCircleAtPoint(self.point.x, self.point.y, dynamicRadius)
 	playdate.graphics.popContext()
+
+	local img = playdate.graphics.image.new(gGridSize, gGridSize, playdate.graphics.kColorClear)
+	playdate.graphics.pushContext(img)
+		playdate.graphics.setStencilImage(mask)
+		playdate.graphics.setLineWidth(3)
+		playdate.graphics.setStrokeLocation(playdate.graphics.kStrokeInside)
+		playdate.graphics.setColor(playdate.graphics.kColorBlack)
+		playdate.graphics.drawRoundRect(kCursorOffset, kCursorOffset, gGridSize - (2 * kCursorOffset), gGridSize - (2 * kCursorOffset), 4)
+	playdate.graphics.popContext()
+
 	self:setImage(img)
 
 end
