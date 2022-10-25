@@ -7,11 +7,12 @@ end
 -- split(s, delimiter)
 --
 function split(s, delimiter)
-    result = {}
-    for match in (s..delimiter):gmatch("(.-)"..delimiter) do
-        table.insert(result, match)
-    end
-    return result
+	result = {}
+	for match in (s..delimiter):gmatch("(.-)"..delimiter) do
+		table.insert(result, match)
+	end
+	return result
+end
 
 -- log2(n)
 --
