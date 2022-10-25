@@ -2,5 +2,5 @@ name=2048
 author=HTeuMeuLeu
 description=2048 for the Playdate.
 bundleID=com.hteumeuleu.2048
-version=1.0.0
+version=1.0.1
 imagePath=SystemAssets
