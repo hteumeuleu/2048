@@ -12,4 +12,9 @@ function split(s, delimiter)
         table.insert(result, match)
     end
     return result
+
+-- log2(n)
+--
+function log2(n)
+	return math.floor(math.log10(n) / math.log10(2) + 0.5)
 end

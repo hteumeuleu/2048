@@ -16,6 +16,7 @@ function Tile:init(value)
 	self:initImage()
 	self:setCollideRect(gGridBorderSize / 2 * -1, gGridBorderSize / 2 * -1, self.width + gGridBorderSize, self.height + gGridBorderSize)
 	self:setTag(value)
+	self:setTag(log2(value))
 	self:setGroups({kTileCollisionGroup})
 	self:setCollidesWithGroups({kTileCollisionGroup})
 	self:add()
@@ -47,9 +48,6 @@ end
 function Tile:initImage()
 
 	local img = playdate.graphics.image.new(self.width, self.height)
-	function log2(n)
-		return math.floor(math.log10(n) / math.log10(2) + 0.5)
-	end
 	local kTileHeightOffset = math.floor(map(log2(self.value) - 1, 0, 10, 0, 5))
 	local kTileBorderSize = 2
 	playdate.graphics.pushContext(img)
