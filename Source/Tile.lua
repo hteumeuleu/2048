@@ -13,10 +13,9 @@ function Tile:init(value)
 	self.width = gTileSize
 	self.height = gTileSize
 	self.isNew = true
+	self:setTag(log2(value))
 	self:initImage()
 	self:setCollideRect(gGridBorderSize / 2 * -1, gGridBorderSize / 2 * -1, self.width + gGridBorderSize, self.height + gGridBorderSize)
-	self:setTag(value)
-	self:setTag(log2(value))
 	self:setGroups({kTileCollisionGroup})
 	self:setCollidesWithGroups({kTileCollisionGroup})
 	self:add()
@@ -60,6 +59,9 @@ function Tile:initImage()
 		playdate.graphics.setColor(playdate.graphics.kColorWhite)
 		playdate.graphics.fillRoundRect(kTileBorderSize, kTileBorderSize, self.width - (2 * kTileBorderSize), innerTileHeight, gTileRadius)
 		local font = playdate.graphics.getSystemFont(playdate.graphics.font.kVariantBold)
+		if self:getTag() >= 14 then
+			playdate.graphics.setFontTracking(-2)
+		end
 		local fontHeight = font:getHeight()
 		local arbitraryValueToFixFontHeightWeirdness = 2
 		local textY = (innerTileHeight - fontHeight) / 2 + kTileBorderSize + arbitraryValueToFixFontHeightWeirdness
