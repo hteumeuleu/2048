@@ -322,6 +322,7 @@ function Grid:move(direction)
 			self.isAnimating = true
 		else
 			self:shake(vector)
+			self.game.sounds.one:play()
 		end
 
 	end
