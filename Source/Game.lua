@@ -9,6 +9,7 @@ function Game:init()
 	self.startTiles = 2
 	self.cursor = Cursor()
 	self:initInputHandlers()
+	self:initSounds()
 	self:setup()
 	return self
 
@@ -263,6 +264,19 @@ function Game:hasSave()
 
 end
 
+-- initSounds()
+--
+function Game:initSounds()
+
+	self.sounds = {}
+	self.sounds.one = playdate.sound.sample.new("Sounds/African1.wav")
+	self.sounds.two = playdate.sound.sample.new("Sounds/African2.wav")
+	self.sounds.three = playdate.sound.sample.new("Sounds/African3.wav")
+	self.sounds.four = playdate.sound.sample.new("Sounds/African4.wav")
+	printTable(self.sounds)
+
+end
+
 -- initInputHandlers()
 --
 -- Add control handlers.
@@ -282,10 +296,36 @@ function Game:initInputHandlers()
 			if self:hasAvailableMoves() then
 				self:moveLeft()
 			end
+			-- local channel = playdate.sound.channel.new()
+			-- channel:setPan(-1)
+			if self.grid.hasMoved then
+				-- self.sounds.two:play()
+				local player = playdate.sound.sampleplayer.new(self.sounds.two)
+				player:setVolume(0.8, 0.2)
+				player:play()
+			else
+				-- self.sounds.one:play()
+				local player = playdate.sound.sampleplayer.new(self.sounds.one)
+				player:setVolume(0.4, 0.1)
+				player:play()
+			end
 		end,
 		rightButtonDown = function()
 			if self:hasAvailableMoves() then
 				self:moveRight()
+			end
+			-- local channel = playdate.sound.channel.new()
+			-- channel:setPan(1)
+			if self.grid.hasMoved then
+				-- self.sounds.three:play()
+				local player = playdate.sound.sampleplayer.new(self.sounds.three)
+				player:setVolume(0.2, 0.8)
+				player:play()
+			else
+				-- self.sounds.one:play()
+				local player = playdate.sound.sampleplayer.new(self.sounds.one)
+				player:setVolume(0.1, 0.4)
+				player:play()
 			end
 		end,
 		upButtonDown = function()
