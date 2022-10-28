@@ -64,6 +64,7 @@ function Game:startRestartTimer()
 	end
 	local timerDuration = self.restartTimerDuration
 	self.restartTimer = playdate.timer.new(timerDuration, function()
+		self:saveBestScore()
 		self:restart()
 		self.restartTimerAngle = 1
 		self.restartTimerCooldownAngle = 1
@@ -235,11 +236,19 @@ end
 --
 function Game:save()
 
-	if self.score:getValue() > self.bestScore:getValue() then
-		self.bestScore:save()
-	end
+	self:saveBestScore()
 	if self:hasAvailableMoves() then
 		playdate.datastore.write({self.grid:serialize(), self.score:getValue()}, "save")
+	end
+
+end
+
+-- saveBestScore()
+--
+function Game:saveBestScore()
+
+	if self.score:getValue() >= self.bestScore:getValue() then
+		self.bestScore:save()
 	end
 
 end
