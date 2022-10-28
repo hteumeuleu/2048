@@ -235,7 +235,12 @@ end
 --
 function Game:save()
 
-	playdate.datastore.write({self.grid:serialize(), self.score:getValue()}, "save")
+	if self.score:getValue() > self.bestScore:getValue() then
+		self.bestScore:save()
+	end
+	if self:hasAvailableMoves() then
+		playdate.datastore.write({self.grid:serialize(), self.score:getValue()}, "save")
+	end
 
 end
 

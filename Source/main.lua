@@ -42,11 +42,14 @@ end
 --
 function playdate.gameWillTerminate()
 
-	if game.score:getValue() >= game.bestScore:getValue() then
-		game.bestScore:save()
-	end
-	if game:hasAvailableMoves() then
-		game:save()
-	end
+	game:save()
+
+end
+
+-- playdate.deviceWillSleep()
+--
+function playdate.deviceWillSleep()
+
+	game:save()
 
 end
