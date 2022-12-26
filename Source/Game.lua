@@ -10,6 +10,7 @@ function Game:init()
 	self.cursor = Cursor()
 	self:initInputHandlers()
 	self:initSounds()
+	self:addMenuItems()
 	self:setup()
 	return self
 
@@ -25,6 +26,7 @@ function Game:update()
 	end
 	if not self:hasAvailableMoves() and not self.gameOverIsOnScreen then
 		self:drawGameOverScreen()
+		self:playSound()
 	end
 
 end
@@ -268,12 +270,99 @@ end
 --
 function Game:initSounds()
 
-	self.sounds = {}
-	self.sounds.one = playdate.sound.sample.new("Sounds/African1.wav")
-	self.sounds.two = playdate.sound.sample.new("Sounds/African2.wav")
-	self.sounds.three = playdate.sound.sample.new("Sounds/African3.wav")
-	self.sounds.four = playdate.sound.sample.new("Sounds/African4.wav")
-	printTable(self.sounds)
+	local data = playdate.datastore.read("sound")
+	if data ~= nil then
+		self.hasSound = data[1]
+	else
+		self.hasSound = true
+	end
+
+	function synth(path)
+
+		local sample, err = playdate.sound.sample.new(path)
+		if err then
+			print(err)
+		end
+		local s = playdate.sound.synth.new(sample)
+		s:setVolume(0.5)
+		s:setAttack(0)
+		s:setDecay(0.15)
+		s:setSustain(0.2)
+		s:setRelease(0)
+		return s
+
+	end
+
+	self.instrument = playdate.sound.instrument.new()
+	self.instrument:addVoice(synth("Sounds/C2"), "C2")
+	self.instrument:addVoice(synth("Sounds/D2"), "D2")
+	self.instrument:addVoice(synth("Sounds/E2"), "E2")
+	self.instrument:addVoice(synth("Sounds/F2"), "F2")
+	self.instrument:addVoice(synth("Sounds/G2"), "G2")
+	self.instrument:addVoice(synth("Sounds/A3"), "A3")
+	self.instrument:addVoice(synth("Sounds/B3"), "B3")
+	self.instrument:addVoice(synth("Sounds/C3"), "C3")
+
+	local track <const> = playdate.sound.track.new()
+	track:setInstrument(self.instrument)
+	track:addNote(1, "C2", 1)
+	track:addNote(2, "D2", 1)
+	track:addNote(3, "E2", 1)
+	track:addNote(4, "F2", 1)
+	track:addNote(5, "G2", 1)
+	track:addNote(6, "A3", 1)
+	track:addNote(7, "B3", 1)
+	track:addNote(8, "C3", 1)
+
+	self.sequence = playdate.sound.sequence.new()
+	self.sequence:addTrack(track)
+	self.sequence:setTempo(2)
+
+	self.step = 0
+	self.stepDirection = 1
+
+end
+
+-- playSound()
+--
+function Game:playSound()
+
+	if self.hasSound then
+		if not self:hasAvailableMoves() and self.gameOverIsOnScreen then
+			self.step = self.sequence:getLength()
+			self.stepDirection = -1
+			self.sequence:setTempo(10)
+			self.sequence:play()
+		else
+			if self.grid.hasMoved then
+				self.step += (1 * self.stepDirection)
+				if self.stepDirection == 1 and self.step > self.sequence:getLength() then
+					self.stepDirection = -1
+					self.step = self.sequence:getLength()
+				elseif self.stepDirection == -1 and self.step < 1 then
+					self.stepDirection = 1
+					self.step = 1
+				end
+			end
+			self.sequence:goToStep(self.step, true)
+		end
+	end
+
+end
+
+-- addMenuItems()
+--
+function Game:addMenuItems()
+
+	local menu = playdate.getSystemMenu()
+	menu:addCheckmarkMenuItem("Sound", self.hasSound, function(value)
+		if value then
+			self.hasSound = true
+		else
+			self.hasSound = false
+		end
+		playdate.datastore.write({self.hasSound}, "sound")
+	end)
 
 end
 
@@ -295,47 +384,29 @@ function Game:initInputHandlers()
 		leftButtonDown = function()
 			if self:hasAvailableMoves() then
 				self:moveLeft()
-			end
-			-- local channel = playdate.sound.channel.new()
-			-- channel:setPan(-1)
-			if self.grid.hasMoved then
-				-- self.sounds.two:play()
-				local player = playdate.sound.sampleplayer.new(self.sounds.two)
-				player:setVolume(0.8, 0.2)
-				player:play()
-			else
-				-- self.sounds.one:play()
-				local player = playdate.sound.sampleplayer.new(self.sounds.one)
-				player:setVolume(0.4, 0.1)
-				player:play()
+				self.instrument:setVolume(0.8, 0.4)
+				self:playSound()
 			end
 		end,
 		rightButtonDown = function()
 			if self:hasAvailableMoves() then
 				self:moveRight()
-			end
-			-- local channel = playdate.sound.channel.new()
-			-- channel:setPan(1)
-			if self.grid.hasMoved then
-				-- self.sounds.three:play()
-				local player = playdate.sound.sampleplayer.new(self.sounds.three)
-				player:setVolume(0.2, 0.8)
-				player:play()
-			else
-				-- self.sounds.one:play()
-				local player = playdate.sound.sampleplayer.new(self.sounds.one)
-				player:setVolume(0.1, 0.4)
-				player:play()
+				self.instrument:setVolume(0.4, 0.8)
+				self:playSound()
 			end
 		end,
 		upButtonDown = function()
 			if self:hasAvailableMoves() then
 				self:moveUp()
+				self.instrument:setVolume(0.8, 0.8)
+				self:playSound()
 			end
 		end,
 		downButtonDown = function()
 			if self:hasAvailableMoves() then
 				self:moveDown()
+				self.instrument:setVolume(0.8, 0.8)
+				self:playSound()
 			end
 		end,
 		cranked = function(change, acceleratedChange)
