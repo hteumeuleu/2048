@@ -8,10 +8,9 @@ function Score:init(text, index)
 	Score.super.init(self)
 	self.previousValue = 0
 	self.value = 0
-	self.width = (160 - (3 * 8)) / 2
-	self.height = 50
 	self.text = string.lower(text)
 	self.index = index
+	self:setSize((160 - (3 * 8)) / 2, 50)
 	self:setZIndex(11)
 	self:drawImage()
 	self:setCollisionsEnabled(false)

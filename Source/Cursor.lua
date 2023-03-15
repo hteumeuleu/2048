@@ -11,9 +11,8 @@ local kCursorOffset <const> = 2
 function Cursor:init()
 
 	Cursor.super.init(self)
-	self.width = gGridSize
-	self.height = gGridSize
 	self.point = playdate.geometry.point.new(0, 0)
+	self:setSize(gGridSize, gGridSize)
 	self:setZIndex(10)
 	self:drawImage()
 	self:initAnimator()
