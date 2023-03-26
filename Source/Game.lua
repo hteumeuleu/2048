@@ -131,6 +131,7 @@ function Game:addStartTilesFromSave()
 		for i=1, #tiles, 1 do
 			local value = tiles[i]
 			if value ~= "x" then
+				value = tonumber(value)
 				local col = math.ceil((i - 1) % 4 + 1)
 				local row = math.ceil(i / 4)
 				self.grid:addTile(col, row, value)
