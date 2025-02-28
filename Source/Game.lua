@@ -8,6 +8,7 @@ function Game:init()
 	Game.super.init(self)
 	self.startTiles = 2
 	self.cursor = Cursor()
+	self.settings = Settings()
 	self:initInputHandlers()
 	self:setup()
 	return self
@@ -299,34 +300,36 @@ function Game:initInputHandlers()
 			end
 		end,
 		cranked = function(change, acceleratedChange)
-			if math.abs(change) > 0.005 and self:hasAvailableMoves() then
-				local abs = playdate.getCrankPosition()
-				self.cursor:setAngle(abs)
-				self.cursor:show()
-				local function hideCursorCallback()
-					self.cursor:hide()
-				end
-				local function afterCrankCallback(abs)
-					if abs >= 55 and abs < 125 then
-						self:moveRight()
-					elseif abs >= 145 and abs < 215 then
-						self:moveDown()
-					elseif abs >= 225 and abs < 305 then
-						self:moveLeft()
-					elseif abs >= 315 or abs < 35 then
-						self:moveUp()
+			if self.settings:usesCrank() then
+				if math.abs(change) > 0.005 and self:hasAvailableMoves() then
+					local abs = playdate.getCrankPosition()
+					self.cursor:setAngle(abs)
+					self.cursor:show()
+					local function hideCursorCallback()
+						self.cursor:hide()
 					end
-					self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
+					local function afterCrankCallback(abs)
+						if abs >= 55 and abs < 125 then
+							self:moveRight()
+						elseif abs >= 145 and abs < 215 then
+							self:moveDown()
+						elseif abs >= 225 and abs < 305 then
+							self:moveLeft()
+						elseif abs >= 315 or abs < 35 then
+							self:moveUp()
+						end
+						self.hideCursorTimer = playdate.timer.performAfterDelay(1000, hideCursorCallback)
+					end
+					-- Remove the timer to hide the cursor
+					if(self.hideCursorTimer ~= nil) then
+						self.hideCursorTimer:remove()
+					end
+					-- Remove the timer that executes the action
+					if(self.crankTimer ~= nil) then
+						self.crankTimer:remove()
+					end
+					self.crankTimer = playdate.timer.performAfterDelay(200, afterCrankCallback, abs)
 				end
-				-- Remove the timer to hide the cursor
-				if(self.hideCursorTimer ~= nil) then
-					self.hideCursorTimer:remove()
-				end
-				-- Remove the timer that executes the action
-				if(self.crankTimer ~= nil) then
-					self.crankTimer:remove()
-				end
-				self.crankTimer = playdate.timer.performAfterDelay(200, afterCrankCallback, abs)
 			end
 		end,
 	}

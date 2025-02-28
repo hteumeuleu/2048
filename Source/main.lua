@@ -11,6 +11,7 @@ import "Grid"
 import "Tile"
 import "Cursor"
 import "Score"
+import "Settings"
 
 -- Global variables
 gFontFullCircle = playdate.graphics.font.new("fonts/font-full-circle")
